@@ -1,5 +1,4 @@
-﻿using System.Net;
-using System.Net.Sockets;
+﻿using UdpMulticast.Client.Services;
 
 namespace UdpMulticast.Client
 {
@@ -7,19 +6,23 @@ namespace UdpMulticast.Client
     {
         private static void Main(string[] args)
         {
-            //TODO: Get this from xml:
+            var client = new UdpMulticastReceiver(1000);
 
-            var groupAddress = IPAddress.Parse("FF01::1");
-            //var serverPort = 2000;
-            var udpClient = new UdpClient(1000, AddressFamily.InterNetworkV6);
+            var groupAddress = "FF01::1";
+            client.StartMulticastConversation(groupAddress);
 
-            var client = new MyUdpClient(udpClient, groupAddress);
+            var thread = new Thread(new ThreadStart(client.ReciveData));
+            thread.Start();
 
-            client.StartMulticastConversation();
+            while (true)
+            {
+                var key = Console.ReadKey();
 
-            Thread.Sleep(2000);
-
-            Console.ReadLine();
+                if (key.Key == ConsoleKey.Enter)
+                {
+                    Console.WriteLine(client.CountReceivedPackets.ToString());
+                }
+            }
         }
     }
 }

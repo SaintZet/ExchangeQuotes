@@ -1,51 +1,52 @@
 ﻿using System.Net;
 using System.Net.Sockets;
-using UdpMulticast.Domain;
+using UdpMulticast.Server.Abstractions;
 
-namespace UdpMulticast.Server
+namespace UdpMulticast.Server.Services
 {
-    internal class ClientOriginator
+    internal class UdpMulticastSender<T> : IDisposable, IExchangeQuotesSender<T> where T : struct
     {
-        private readonly UdpClient _clientOriginator;
+        private readonly UdpClient _udpClient;
 
-        private IPEndPoint? _clientTargetdest;
+        private IPEndPoint? _clientReceiver;
 
-        public ClientOriginator(UdpClient client)
+        public UdpMulticastSender(int udpPort)
         {
-            _clientOriginator = client;
+            _udpClient = new UdpClient(udpPort, AddressFamily.InterNetworkV6);
         }
 
-        public void SendData(double exghange)
+        public void SendData(T exghange)
         {
-            Thread.Sleep(100);
-            if (_clientTargetdest is null)
+            if (_clientReceiver is null)
             {
                 throw new InvalidOperationException();
             }
 
-            Console.WriteLine($"\nThe ClientOriginator sent:\n");
-
-            Send.OriginatorSendData(_clientOriginator, _clientTargetdest);
-
-            //Console.WriteLine($"\nThe ClientOriginator sent:{exghange}\n");
-
-            //_clientOriginator.Send(BitConverter.GetBytes(exghange), _clientTargetdest!);
+            _udpClient.Send(BitConverter.GetBytes((dynamic)exghange), _clientReceiver!);
         }
 
-        public bool ConnectServerAndClient(IPAddress groupAddress, int clientPort)
+        public bool StartMulticastConversation(params object[] dataForConnect)
         {
+            if (dataForConnect[0] is null || dataForConnect[1] is null)
+            {
+                throw new Exception();
+            }
+
+            IPAddress ipGroup = IPAddress.Parse(dataForConnect[0].ToString()!);
+            int receiverPort = (int)dataForConnect[1];
+
             try
             {
-                _clientTargetdest = new(groupAddress, clientPort);
+                _clientReceiver = new(ipGroup, receiverPort);
 
                 // Display the multicast address used.
-                Console.WriteLine("Multicast Address: [" + groupAddress.ToString() + "]");
+                Console.WriteLine("Multicast Address: [" + ipGroup.ToString() + "]");
 
                 // Exercise the use of the IPv6MulticastOption.
                 Console.WriteLine("Instantiate IPv6MulticastOption(IPAddress)");
 
                 // Instantiate IPv6MulticastOption using one of the overloaded constructors.
-                var ipv6MulticastOption = new IPv6MulticastOption(groupAddress);
+                var ipv6MulticastOption = new IPv6MulticastOption(ipGroup);
 
                 // Store the IPAdress multicast options.
                 IPAddress group = ipv6MulticastOption.Group;
@@ -67,7 +68,7 @@ namespace UdpMulticast.Server
                 Console.WriteLine("IPv6MulticastOption.InterfaceIndex: [" + interfaceIndex + "]");
 
                 // Join the specified multicast group using one of the JoinMulticastGroup overloaded methods.
-                _clientOriginator.JoinMulticastGroup((int)interfaceIndex, group);
+                _udpClient.JoinMulticastGroup((int)interfaceIndex, group);
 
                 return true;
             }
@@ -78,9 +79,9 @@ namespace UdpMulticast.Server
             }
         }
 
-        public void CloseConnection()
+        public void Dispose()
         {
-            _clientOriginator!.DropMulticastGroup(_clientTargetdest!.Address);
+            _udpClient!.DropMulticastGroup(_clientReceiver!.Address);
         }
     }
 }
