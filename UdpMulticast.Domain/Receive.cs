@@ -2,7 +2,7 @@
 using System.Net.Sockets;
 using System.Text;
 
-namespace UdpMulticast
+namespace UdpMulticast.Domain
 {
     // The following Receive class is used by both the ClientOriginator and the ClientTarget class to receive data from one another..
     public class Receive

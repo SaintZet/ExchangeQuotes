@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 
-namespace UdpMulticast
+namespace UdpMulticast.Domain
 {
     // The following Send class is used by both the ClientOriginator and ClientTarget classes to send data to one another.
     public class Send
