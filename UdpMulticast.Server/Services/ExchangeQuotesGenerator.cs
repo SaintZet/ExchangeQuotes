@@ -2,23 +2,22 @@
 
 namespace UdpMulticast.Server.Services
 {
-    internal class RandomExchangeQuotesGenerator<T> : IExchangeQuotesProvider<T> where T : struct
+    internal class RandomExchangeQuotesGenerator : IExchangeQuotesProvider
     {
         private readonly Random _random = new();
 
-        private readonly T _minValue;
-        private readonly T _maxValue;
+        private readonly double _minValue;
+        private readonly double _maxValue;
 
-        public RandomExchangeQuotesGenerator(T minValue, T maxValue)
+        public RandomExchangeQuotesGenerator(double minValue, double maxValue)
         {
-            _minValue = minValue!;
-            _maxValue = maxValue!;
+            _minValue = minValue;
+            _maxValue = maxValue;
         }
 
-        public T CurrentExchangeQuote()
+        public double CurrentExchangeQuote()
         {
-            //TODO: delete dynamic
-            return _minValue + (_random.NextDouble() * ((dynamic)_maxValue - _minValue));
+            return _minValue + (_random.NextDouble() * (_maxValue - _minValue));
         }
     }
 }

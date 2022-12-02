@@ -1,8 +1,8 @@
 ﻿namespace UdpMulticast.Server.Abstractions
 {
-    internal interface IExchangeQuotesSender<T> : IDisposable where T : struct
+    internal interface IExchangeQuotesSender : IDisposable
     {
-        void SendData(T exchangeQuotes);
+        void SendData(double exchangeQuotes);
 
         bool StartMulticastConversation(params object[] dataForConnect);
     }

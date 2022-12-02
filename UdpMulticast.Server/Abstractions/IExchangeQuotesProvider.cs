@@ -1,7 +1,7 @@
 ﻿namespace UdpMulticast.Server.Abstractions
 {
-    internal interface IExchangeQuotesProvider<T> where T : struct
+    internal interface IExchangeQuotesProvider
     {
-        T CurrentExchangeQuote();
+        double CurrentExchangeQuote();
     }
 }

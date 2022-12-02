@@ -1,9 +1,11 @@
-﻿using System.Net;
+﻿using System.Collections.Concurrent;
+using System.Net;
 using System.Net.Sockets;
+using UdpMulticast.Client.Abstractions;
 
 namespace UdpMulticast.Client.Services
 {
-    internal class UdpMulticastReceiver : IDisposable
+    internal class UdpMulticastReceiver : IExchangeQuotesReceiver
     {
         private readonly UdpClient _udpClient;
         private IPAddress? _ipGroup;
@@ -15,7 +17,7 @@ namespace UdpMulticast.Client.Services
 
         public int CountReceivedPackets { get; private set; }
 
-        public void StartMulticastConversation(params object[] dataForConnect)
+        public bool StartMulticastConversation(params object[] dataForConnect)
         {
             if (dataForConnect[0] is null)
             {
@@ -24,25 +26,31 @@ namespace UdpMulticast.Client.Services
 
             _ipGroup = IPAddress.Parse(dataForConnect[0].ToString()!);
             _udpClient.JoinMulticastGroup(_ipGroup);
+
+            return true;
         }
 
-        public void ReciveData()
+        public void ReciveData(ref ConcurrentQueue<double> numbers, ref AutoResetEvent signal)
         {
-            var endpoint = new IPEndPoint(IPAddress.IPv6Any, 50);
-
+            numbers = new ConcurrentQueue<double>();
             try
             {
+                var endpoint = new IPEndPoint(IPAddress.IPv6Any, 50);
+
                 while (true)
                 {
                     byte[] bytes = _udpClient.Receive(ref endpoint);
                     double number = BitConverter.ToDouble(bytes, 0);
 
+                    numbers.Enqueue(number);
+                    signal.Set();
+
                     CountReceivedPackets++;
-
-                    Console.WriteLine(number.ToString());
-
-                    //raise event
                 }
+            }
+            catch (ThreadInterruptedException)
+            {
+                Thread.Sleep(1000);
             }
             catch (Exception e)
             {

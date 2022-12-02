@@ -4,7 +4,7 @@ using UdpMulticast.Server.Abstractions;
 
 namespace UdpMulticast.Server.Services
 {
-    internal class UdpMulticastSender<T> : IDisposable, IExchangeQuotesSender<T> where T : struct
+    internal class UdpMulticastSender : IExchangeQuotesSender
     {
         private readonly UdpClient _udpClient;
 
@@ -15,14 +15,14 @@ namespace UdpMulticast.Server.Services
             _udpClient = new UdpClient(udpPort, AddressFamily.InterNetworkV6);
         }
 
-        public void SendData(T exghange)
+        public void SendData(double exghange)
         {
             if (_clientReceiver is null)
             {
                 throw new InvalidOperationException();
             }
 
-            _udpClient.Send(BitConverter.GetBytes((dynamic)exghange), _clientReceiver!);
+            _udpClient.Send(BitConverter.GetBytes(exghange), _clientReceiver!);
         }
 
         public bool StartMulticastConversation(params object[] dataForConnect)

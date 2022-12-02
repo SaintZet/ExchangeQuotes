@@ -1,8 +1,10 @@
-﻿namespace UdpMulticast.Client.Abstractions
+﻿using System.Collections.Concurrent;
+
+namespace UdpMulticast.Client.Abstractions
 {
-    internal interface IExchangeQuotesReceiver<T> : IDisposable where T : struct
+    internal interface IExchangeQuotesReceiver : IDisposable
     {
-        void ReciveData(T exchangeQuotes);
+        void ReciveData(ref ConcurrentQueue<double> numbers, ref AutoResetEvent signal);
 
         bool StartMulticastConversation(params object[] dataForConnect);
     }
