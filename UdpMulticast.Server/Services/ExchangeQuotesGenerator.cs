@@ -15,9 +15,6 @@ namespace ExchangeQuotes.Server.Services
             _maxValue = maxValue;
         }
 
-        public double CurrentExchangeQuote()
-        {
-            return _minValue + (_random.NextDouble() * (_maxValue - _minValue));
-        }
+        public double CurrentExchangeQuote() => _minValue + (_random.NextDouble() * (_maxValue - _minValue));
     }
 }

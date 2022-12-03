@@ -1,6 +1,6 @@
 ﻿using ExchangeQuotes.Client.Abstractions;
 using ExchangeQuotes.Client.Services;
-using System.Collections.Concurrent;
+using System.Net;
 
 namespace ExchangeQuotes.Client
 {
@@ -8,21 +8,22 @@ namespace ExchangeQuotes.Client
     {
         private static void Main(string[] args)
         {
-            var data = new ConcurrentQueue<double>();
-            var signal = new AutoResetEvent(true);
+            int port = 2222;
+            IPAddress multicastIPAddress = IPAddress.Parse("239.0.0.222");
 
-            IExchangeQuotesReceiver client = new UdpMulticastReceiver(1000);
+            ExchangeQuotesCalculateStatistic calcWorker = new ExchangeQuotesCalculateStatistic();
 
-            var groupAddress = "FF01::1";
-            client.StartConversation(groupAddress);
+            UdpMulticastReceiver client = new UdpMulticastReceiver(port, multicastIPAddress);
 
-            var threadRecive = new Thread(new ThreadStart(() => client.ReciveData(ref data, ref signal)));
+            client.AddMessageReceivedHandler(calcWorker.CalculateValues);
+
+            client.UdpMessageReceived += calcWorker.OnUdpMessageReceived!;
+
+            var threadRecive = new Thread(new ThreadStart(() => client.StartListeningIncomingData()));
             threadRecive.Start();
 
-            IExchangeQuotesCalculateWorker calcWorker = new ExchangeQuotesCalculateStatistic();
-
-            var threadCalc = new Thread(new ThreadStart(() => calcWorker.DoWork(ref data, ref signal)));
-            threadCalc.Start();
+            //var threadCalc = new Thread(new ThreadStart(() => calcWorker.DoWork(ref data, ref signal)));
+            //threadCalc.Start();
 
             while (true)
             {
@@ -30,7 +31,7 @@ namespace ExchangeQuotes.Client
 
                 if (key.Key == ConsoleKey.Enter)
                 {
-                    Console.WriteLine($"Average: {calcWorker.CurrentValues.Average}\n Packets: {client.CountReceivedPackets}");
+                    Console.WriteLine($"Average: {calcWorker.CurrentValues.Average}\n");
                 }
             }
         }

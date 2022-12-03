@@ -1,60 +1,21 @@
-﻿using System.Net;
-using System.Net.Sockets;
+﻿using ExchangeQuotes.Core.Communication;
 using ExchangeQuotes.Server.Abstractions;
+using System.Net;
 
 namespace ExchangeQuotes.Server.Services
 {
-    internal class UdpMulticastSender : IExchangeQuotesSender
+    internal class UdpMulticastSender : UdpClientWrapper, IExchangeQuotesSender
     {
-        private readonly UdpClient _udpClient;
-
-        private IPEndPoint? _clientReceiver;
-
-        public UdpMulticastSender(int udpPort)
+        public UdpMulticastSender(int port, IPAddress multicastIPAddress, IPAddress? localIPAddress = null)
+            : base(port, multicastIPAddress, localIPAddress)
         {
-            _udpClient = new UdpClient(udpPort, AddressFamily.InterNetworkV6);
         }
 
-        public void SendData(double exghange)
+        public void SendData(double data)
         {
-            if (_clientReceiver is null)
-            {
-                throw new InvalidOperationException();
-            }
+            byte[] dgram = BitConverter.GetBytes(data);
 
-            _udpClient.Send(BitConverter.GetBytes(exghange), _clientReceiver);
-        }
-
-        public bool StartMulticastConversation(params object[] dataForConnect)
-        {
-            if (dataForConnect[0] is null || dataForConnect[1] is null)
-            {
-                throw new Exception();
-            }
-
-            try
-            {
-                IPAddress ipGroup = IPAddress.Parse(dataForConnect[0].ToString()!);
-
-                int receiverPort = (int)dataForConnect[1];
-
-                _clientReceiver = new(ipGroup, receiverPort);
-
-                _udpClient.JoinMulticastGroup(ipGroup);
-
-                return true;
-            }
-            catch (Exception)
-            {
-                //TODO: exception handler
-
-                return false;
-            }
-        }
-
-        public void Dispose()
-        {
-            _udpClient!.DropMulticastGroup(_clientReceiver!.Address);
+            _udpclient.Send(dgram, dgram.Length, _remoteEndPoint);
         }
     }
 }

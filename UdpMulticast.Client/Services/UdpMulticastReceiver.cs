@@ -1,72 +1,54 @@
-﻿using System.Collections.Concurrent;
+﻿using ExchangeQuotes.Core.Communication;
 using System.Net;
-using System.Net.Sockets;
-using ExchangeQuotes.Client.Abstractions;
 
 namespace ExchangeQuotes.Client.Services
 {
-    internal class UdpMulticastReceiver : IExchangeQuotesReceiver
+    internal class UdpMulticastReceiver : UdpClientWrapper
     {
-        private readonly UdpClient _udpClient;
-        private IPAddress? _ipGroupAddress;
+        private Action<byte[]> _action;
 
-        public UdpMulticastReceiver(int udpPort)
+        public UdpMulticastReceiver(int port, IPAddress multicastIPAddress, IPAddress? localIPAddress = null)
+                    : base(port, multicastIPAddress, localIPAddress)
         {
-            _udpClient = new UdpClient(udpPort, AddressFamily.InterNetworkV6);
         }
 
-        public int CountReceivedPackets { get; private set; }
+        public event EventHandler<UdpMessageReceivedEventArgs>? UdpMessageReceived;
 
-        public bool StartConversation(params object[] dataForConnect)
+        public void StartListeningIncomingData()
         {
-            if (dataForConnect[0] is null || dataForConnect is null)
-            {
-                throw new ArgumentException($"First element must be ip group address.");
-            }
-
-            try
-            {
-                _ipGroupAddress = IPAddress.Parse(dataForConnect[0].ToString()!);
-                _udpClient.JoinMulticastGroup(_ipGroupAddress);
-            }
-            catch (Exception)
-            {
-                //TODO: Add handler
-            }
-
-            return true;
+            _udpclient.BeginReceive(new AsyncCallback(ReceivedCallback), null);
         }
 
-        public void ReciveData(ref ConcurrentQueue<double> numbers, ref AutoResetEvent signal)
+        internal void AddMessageReceivedHandler(Action<byte[]> action)
+        {
+            _action = action;
+        }
+
+        private void ReceivedCallback(IAsyncResult asyncResult)
         {
             try
             {
-                var endpoint = new IPEndPoint(IPAddress.IPv6Any, 50);
+                int managedThreadId = Environment.CurrentManagedThreadId;
+                Console.WriteLine("Reciver: " + managedThreadId);
 
-                while (true)
-                {
-                    byte[] bytes = _udpClient.Receive(ref endpoint);
-                    double number = BitConverter.ToDouble(bytes, 0);
+                IPEndPoint sender = new(0, 0);
+                byte[] receivedBytes = _udpclient.EndReceive(asyncResult, ref sender!);
 
-                    numbers.Enqueue(number);
-                    signal.Set();
+                _action(receivedBytes);
 
-                    CountReceivedPackets++;
-                }
+                //UdpMessageReceived?.Invoke(this, new UdpMessageReceivedEventArgs() { Data = receivedBytes });
+
+                _udpclient.BeginReceive(new AsyncCallback(ReceivedCallback), null);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                //TODO: Add handler
-            }
-            finally
-            {
-                Dispose();
+                throw;
             }
         }
 
-        public void Dispose()
+        internal class UdpMessageReceivedEventArgs : EventArgs
         {
-            _udpClient.DropMulticastGroup(_ipGroupAddress!);
+            public byte[]? Data { get; set; }
         }
     }
 }

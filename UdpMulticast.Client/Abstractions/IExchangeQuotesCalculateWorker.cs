@@ -1,5 +1,5 @@
 ﻿using ExchangeQuotes.Client.Models;
-using System.Collections.Concurrent;
+using ExchangeQuotes.Client.Services;
 
 namespace ExchangeQuotes.Client.Abstractions
 {
@@ -7,6 +7,8 @@ namespace ExchangeQuotes.Client.Abstractions
     {
         ExchangeQuotesStatistic CurrentValues { get; }
 
-        void DoWork(ref ConcurrentQueue<double> exchangeQuotes, ref AutoResetEvent signal);
+        public void OnUdpMessageReceived(object sender, UdpMulticastReceiver.UdpMessageReceivedEventArgs e);
+
+        public void CalculateValues(double exchangeQuote);
     }
 }

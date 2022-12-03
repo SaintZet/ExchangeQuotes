@@ -2,11 +2,10 @@
 using ExchangeQuotes.Client.Models;
 using ExchangeQuotes.Math.Abstractions;
 using ExchangeQuotes.Math.Statistic;
-using System.Collections.Concurrent;
 
 namespace ExchangeQuotes.Client.Services
 {
-    internal class ExchangeQuotesCalculateStatistic : IExchangeQuotesCalculateWorker
+    internal class ExchangeQuotesCalculateStatistic //: IExchangeQuotesCalculateWorker
     {
         private readonly IStatisticCalculator _averageCalculator, _standardDeviationCalculator, _modeCalculator, _medianCalculator;
         private readonly IList<IStatisticCalculator> _statisticCalculators;
@@ -27,30 +26,46 @@ namespace ExchangeQuotes.Client.Services
             };
         }
 
-        //TODO: maybe it's not thrad safe?
-        public ExchangeQuotesStatistic CurrentValues => new()
-        {
-            Average = _averageCalculator.GetCurrentResult(),
-            Median = _medianCalculator.GetCurrentResult(),
-            Mode = _modeCalculator.GetCurrentResult(),
-            StandardDeviation = _standardDeviationCalculator.GetCurrentResult(),
-        };
+        public ExchangeQuotesStatistic CurrentValues => GetValues();
 
-        //TODO: Maybe add cancellation token
-        public void DoWork(ref ConcurrentQueue<double> exchangeQuotes, ref AutoResetEvent signal)
+        public ExchangeQuotesStatistic GetValues()
         {
-            while (true)
+            int managedThreadId = Environment.CurrentManagedThreadId;
+            Console.WriteLine("GetValues: " + managedThreadId);
+
+            return new()
             {
-                signal.WaitOne();
+                Average = _averageCalculator.GetCurrentResult(),
+                Median = _medianCalculator.GetCurrentResult(),
+                Mode = _modeCalculator.GetCurrentResult(),
+                StandardDeviation = _standardDeviationCalculator.GetCurrentResult(),
+            };
+        }
 
-                while (exchangeQuotes.TryDequeue(out double exchangeQuote))
+        public void CalculateValues(byte[] bytes)
+        {
+            try
+            {
+                int managedThreadId = Environment.CurrentManagedThreadId;
+                Console.WriteLine("CalculateValues: " + managedThreadId);
+
+                var exchangeQuote = BitConverter.ToDouble(bytes!, 0);
+
+                foreach (var calculator in _statisticCalculators)
                 {
-                    foreach (var calculator in _statisticCalculators)
-                    {
-                        calculator.AddNumberToSequence(exchangeQuote);
-                    }
+                    calculator.AddNumberToSequence(exchangeQuote);
                 }
+
+                Console.WriteLine(exchangeQuote.ToString());
             }
+            catch (Exception e)
+            {
+                throw;
+            }
+        }
+
+        public void OnUdpMessageReceived(object sender, UdpMulticastReceiver.UdpMessageReceivedEventArgs e)
+        {
         }
     }
 }
