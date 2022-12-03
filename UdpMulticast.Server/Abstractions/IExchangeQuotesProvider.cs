@@ -1,4 +1,4 @@
-﻿namespace UdpMulticast.Server.Abstractions
+﻿namespace ExchangeQuotes.Server.Abstractions
 {
     internal interface IExchangeQuotesProvider
     {

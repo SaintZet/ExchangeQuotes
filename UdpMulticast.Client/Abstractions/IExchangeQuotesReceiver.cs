@@ -1,11 +1,13 @@
 ﻿using System.Collections.Concurrent;
 
-namespace UdpMulticast.Client.Abstractions
+namespace ExchangeQuotes.Client.Abstractions
 {
     internal interface IExchangeQuotesReceiver : IDisposable
     {
+        int CountReceivedPackets { get; }
+
         void ReciveData(ref ConcurrentQueue<double> numbers, ref AutoResetEvent signal);
 
-        bool StartMulticastConversation(params object[] dataForConnect);
+        bool StartConversation(params object[] dataForConnect);
     }
 }

@@ -1,14 +1,14 @@
 ﻿using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
-using UdpMulticast.Client.Abstractions;
+using ExchangeQuotes.Client.Abstractions;
 
-namespace UdpMulticast.Client.Services
+namespace ExchangeQuotes.Client.Services
 {
     internal class UdpMulticastReceiver : IExchangeQuotesReceiver
     {
         private readonly UdpClient _udpClient;
-        private IPAddress? _ipGroup;
+        private IPAddress? _ipGroupAddress;
 
         public UdpMulticastReceiver(int udpPort)
         {
@@ -17,22 +17,28 @@ namespace UdpMulticast.Client.Services
 
         public int CountReceivedPackets { get; private set; }
 
-        public bool StartMulticastConversation(params object[] dataForConnect)
+        public bool StartConversation(params object[] dataForConnect)
         {
-            if (dataForConnect[0] is null)
+            if (dataForConnect[0] is null || dataForConnect is null)
             {
-                throw new Exception();
+                throw new ArgumentException($"First element must be ip group address.");
             }
 
-            _ipGroup = IPAddress.Parse(dataForConnect[0].ToString()!);
-            _udpClient.JoinMulticastGroup(_ipGroup);
+            try
+            {
+                _ipGroupAddress = IPAddress.Parse(dataForConnect[0].ToString()!);
+                _udpClient.JoinMulticastGroup(_ipGroupAddress);
+            }
+            catch (Exception)
+            {
+                //TODO: Add handler
+            }
 
             return true;
         }
 
         public void ReciveData(ref ConcurrentQueue<double> numbers, ref AutoResetEvent signal)
         {
-            numbers = new ConcurrentQueue<double>();
             try
             {
                 var endpoint = new IPEndPoint(IPAddress.IPv6Any, 50);
@@ -48,24 +54,19 @@ namespace UdpMulticast.Client.Services
                     CountReceivedPackets++;
                 }
             }
-            catch (ThreadInterruptedException)
+            catch (Exception)
             {
-                Thread.Sleep(1000);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
+                //TODO: Add handler
             }
             finally
             {
                 Dispose();
-                Console.WriteLine("Done listening for UDP broadcast");
             }
         }
 
         public void Dispose()
         {
-            _udpClient.DropMulticastGroup(_ipGroup!);
+            _udpClient.DropMulticastGroup(_ipGroupAddress!);
         }
     }
 }

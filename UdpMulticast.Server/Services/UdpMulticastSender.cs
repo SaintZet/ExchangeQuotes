@@ -1,8 +1,8 @@
 ﻿using System.Net;
 using System.Net.Sockets;
-using UdpMulticast.Server.Abstractions;
+using ExchangeQuotes.Server.Abstractions;
 
-namespace UdpMulticast.Server.Services
+namespace ExchangeQuotes.Server.Services
 {
     internal class UdpMulticastSender : IExchangeQuotesSender
     {
@@ -22,7 +22,7 @@ namespace UdpMulticast.Server.Services
                 throw new InvalidOperationException();
             }
 
-            _udpClient.Send(BitConverter.GetBytes(exghange), _clientReceiver!);
+            _udpClient.Send(BitConverter.GetBytes(exghange), _clientReceiver);
         }
 
         public bool StartMulticastConversation(params object[] dataForConnect)
@@ -32,49 +32,22 @@ namespace UdpMulticast.Server.Services
                 throw new Exception();
             }
 
-            IPAddress ipGroup = IPAddress.Parse(dataForConnect[0].ToString()!);
-            int receiverPort = (int)dataForConnect[1];
-
             try
             {
+                IPAddress ipGroup = IPAddress.Parse(dataForConnect[0].ToString()!);
+
+                int receiverPort = (int)dataForConnect[1];
+
                 _clientReceiver = new(ipGroup, receiverPort);
 
-                // Display the multicast address used.
-                Console.WriteLine("Multicast Address: [" + ipGroup.ToString() + "]");
-
-                // Exercise the use of the IPv6MulticastOption.
-                Console.WriteLine("Instantiate IPv6MulticastOption(IPAddress)");
-
-                // Instantiate IPv6MulticastOption using one of the overloaded constructors.
-                var ipv6MulticastOption = new IPv6MulticastOption(ipGroup);
-
-                // Store the IPAdress multicast options.
-                IPAddress group = ipv6MulticastOption.Group;
-                long interfaceIndex = ipv6MulticastOption.InterfaceIndex;
-
-                // Display IPv6MulticastOption properties.
-                Console.WriteLine("IPv6MulticastOption.Group: [" + group + "]");
-                Console.WriteLine("IPv6MulticastOption.InterfaceIndex: [" + interfaceIndex + "]");
-
-                // Instantiate IPv6MulticastOption using another overloaded constructor.
-                var ipv6MulticastOption2 = new IPv6MulticastOption(group, interfaceIndex);
-
-                // Store the IPAdress multicast options.
-                group = ipv6MulticastOption2.Group;
-                interfaceIndex = ipv6MulticastOption2.InterfaceIndex;
-
-                // Display the IPv6MulticastOption2 properties.
-                Console.WriteLine("IPv6MulticastOption.Group: [" + group + "]");
-                Console.WriteLine("IPv6MulticastOption.InterfaceIndex: [" + interfaceIndex + "]");
-
-                // Join the specified multicast group using one of the JoinMulticastGroup overloaded methods.
-                _udpClient.JoinMulticastGroup((int)interfaceIndex, group);
+                _udpClient.JoinMulticastGroup(ipGroup);
 
                 return true;
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                Console.WriteLine("[ClientOriginator.ConnectClients] Exception: " + e.ToString());
+                //TODO: exception handler
+
                 return false;
             }
         }

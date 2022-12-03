@@ -1,6 +1,6 @@
-﻿using UdpMulticast.Server.Abstractions;
+﻿using ExchangeQuotes.Server.Abstractions;
 
-namespace UdpMulticast.Server.Services
+namespace ExchangeQuotes.Server.Services
 {
     internal class RandomExchangeQuotesGenerator : IExchangeQuotesProvider
     {
