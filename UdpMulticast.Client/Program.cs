@@ -1,25 +1,38 @@
-﻿using System.Net;
-using System.Net.Sockets;
+﻿using ExchangeQuotes.Client.Abstractions;
+using ExchangeQuotes.Client.Services;
+using System.Collections.Concurrent;
 
-namespace UdpMulticast.Client
+namespace ExchangeQuotes.Client
 {
     internal class Program
     {
         private static void Main(string[] args)
         {
-            //TODO: Get this from xml:
+            var data = new ConcurrentQueue<double>();
+            var signal = new AutoResetEvent(true);
 
-            var groupAddress = IPAddress.Parse("FF01::1");
-            //var serverPort = 2000;
-            var udpClient = new UdpClient(1000, AddressFamily.InterNetworkV6);
+            IExchangeQuotesReceiver client = new UdpMulticastReceiver(1000);
 
-            var client = new MyUdpClient(udpClient, groupAddress);
+            var groupAddress = "FF01::1";
+            client.StartConversation(groupAddress);
 
-            client.StartMulticastConversation();
+            var threadRecive = new Thread(new ThreadStart(() => client.ReciveData(ref data, ref signal)));
+            threadRecive.Start();
 
-            Thread.Sleep(2000);
+            IExchangeQuotesCalculateWorker calcWorker = new ExchangeQuotesCalculateStatistic();
 
-            Console.ReadLine();
+            var threadCalc = new Thread(new ThreadStart(() => calcWorker.DoWork(ref data, ref signal)));
+            threadCalc.Start();
+
+            while (true)
+            {
+                var key = Console.ReadKey();
+
+                if (key.Key == ConsoleKey.Enter)
+                {
+                    Console.WriteLine($"Average: {calcWorker.CurrentValues.Average}\n Packets: {client.CountReceivedPackets}");
+                }
+            }
         }
     }
 }
