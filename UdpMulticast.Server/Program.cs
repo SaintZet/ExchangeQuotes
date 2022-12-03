@@ -23,7 +23,7 @@ namespace ExchangeQuotes.Server
                 double data = exchangeQuotesProvider.CurrentExchangeQuote();
 
                 server.SendData(data);
-                Console.WriteLine(data.ToString()); Console.WriteLine(data.ToString()); Console.WriteLine(data.ToString()); Console.WriteLine(data.ToString()); Console.WriteLine(data.ToString()); Console.WriteLine(data.ToString()); Console.WriteLine(data.ToString()); Console.WriteLine(data.ToString()); Console.WriteLine(data.ToString()); Console.WriteLine(data.ToString()); Console.WriteLine(data.ToString());
+
                 Console.WriteLine(data.ToString());
             }
         }

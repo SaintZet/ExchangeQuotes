@@ -11,19 +11,14 @@ namespace ExchangeQuotes.Client
             int port = 2222;
             IPAddress multicastIPAddress = IPAddress.Parse("239.0.0.222");
 
-            ExchangeQuotesCalculateStatistic calcWorker = new ExchangeQuotesCalculateStatistic();
+            IExchangeQuotesCalculateWorker calcWorker = new ExchangeQuotesCalculateStatistic();
 
-            UdpMulticastReceiver client = new UdpMulticastReceiver(port, multicastIPAddress);
+            IExchangeQuotesReceiver client = new UdpMulticastReceiver(port, multicastIPAddress);
 
-            client.AddMessageReceivedHandler(calcWorker.CalculateValues);
-
-            client.UdpMessageReceived += calcWorker.OnUdpMessageReceived!;
+            client.SetReceiveHandler(calcWorker.CalculateValues);
 
             var threadRecive = new Thread(new ThreadStart(() => client.StartListeningIncomingData()));
             threadRecive.Start();
-
-            //var threadCalc = new Thread(new ThreadStart(() => calcWorker.DoWork(ref data, ref signal)));
-            //threadCalc.Start();
 
             while (true)
             {
@@ -31,7 +26,8 @@ namespace ExchangeQuotes.Client
 
                 if (key.Key == ConsoleKey.Enter)
                 {
-                    Console.WriteLine($"Average: {calcWorker.CurrentValues.Average}\n");
+                    var statistic = calcWorker.GetCurrentValues();
+                    Console.WriteLine($"Average: {statistic.Average}\n");
                 }
             }
         }

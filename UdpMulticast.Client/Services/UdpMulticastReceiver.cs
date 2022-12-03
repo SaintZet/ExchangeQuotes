@@ -1,54 +1,42 @@
-﻿using ExchangeQuotes.Core.Communication;
+﻿using ExchangeQuotes.Client.Abstractions;
+using ExchangeQuotes.Core.Communication;
 using System.Net;
 
 namespace ExchangeQuotes.Client.Services
 {
-    internal class UdpMulticastReceiver : UdpClientWrapper
+    internal class UdpMulticastReceiver : UdpClientWrapper, IExchangeQuotesReceiver
     {
-        private Action<byte[]> _action;
+        private Action<byte[]>? _receiveHandler;
 
         public UdpMulticastReceiver(int port, IPAddress multicastIPAddress, IPAddress? localIPAddress = null)
                     : base(port, multicastIPAddress, localIPAddress)
         {
         }
 
-        public event EventHandler<UdpMessageReceivedEventArgs>? UdpMessageReceived;
+        public int PacketLoss { get; set; }
 
         public void StartListeningIncomingData()
         {
             _udpclient.BeginReceive(new AsyncCallback(ReceivedCallback), null);
         }
 
-        internal void AddMessageReceivedHandler(Action<byte[]> action)
+        public void SetReceiveHandler(Action<byte[]> action)
         {
-            _action = action;
+            _receiveHandler = action;
         }
 
         private void ReceivedCallback(IAsyncResult asyncResult)
         {
-            try
+            IPEndPoint sender = new(0, 0);
+
+            byte[] receivedBytes = _udpclient.EndReceive(asyncResult, ref sender!);
+
+            if (_receiveHandler is not null)
             {
-                int managedThreadId = Environment.CurrentManagedThreadId;
-                Console.WriteLine("Reciver: " + managedThreadId);
-
-                IPEndPoint sender = new(0, 0);
-                byte[] receivedBytes = _udpclient.EndReceive(asyncResult, ref sender!);
-
-                _action(receivedBytes);
-
-                //UdpMessageReceived?.Invoke(this, new UdpMessageReceivedEventArgs() { Data = receivedBytes });
-
-                _udpclient.BeginReceive(new AsyncCallback(ReceivedCallback), null);
+                _receiveHandler(receivedBytes);
             }
-            catch (Exception e)
-            {
-                throw;
-            }
-        }
 
-        internal class UdpMessageReceivedEventArgs : EventArgs
-        {
-            public byte[]? Data { get; set; }
+            _udpclient.BeginReceive(new AsyncCallback(ReceivedCallback), null);
         }
     }
 }
