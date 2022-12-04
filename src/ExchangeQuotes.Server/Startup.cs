@@ -26,9 +26,7 @@ namespace ExchangeQuotes.Server
             .AddSingleton(s => new Application(s.GetRequiredService<IExchangeQuotesSender>(), s.GetRequiredService<IExchangeQuotesProvider>()))
             ;
 
-            var serviceProvider = services.BuildServiceProvider();
-
-            return serviceProvider;
+            return services.BuildServiceProvider();
         }
 
         private Config LoadConfiguration(IConfigProvider<Config> configProvider)

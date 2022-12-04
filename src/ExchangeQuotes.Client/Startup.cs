@@ -30,9 +30,7 @@ namespace ExchangeQuotes.Client
                 s.GetRequiredService<IExchangeQuotesView>())
             );
 
-            var serviceProvider = services.BuildServiceProvider();
-
-            return serviceProvider;
+            return services.BuildServiceProvider();
         }
 
         private Config LoadConfiguration(IConfigProvider<Config> configProvider)
