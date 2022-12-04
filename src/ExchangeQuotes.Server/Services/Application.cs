@@ -1,7 +1,7 @@
 ﻿using ExchangeQuotes.Core.Abstractions;
 using ExchangeQuotes.Server.Abstractions;
 
-namespace ExchangeQuotes.Server
+namespace ExchangeQuotes.Server.Services
 {
     internal class Application
     {
@@ -14,7 +14,7 @@ namespace ExchangeQuotes.Server
             _exchangeQuotesProvider = exchangeQuotesProvider;
         }
 
-        internal void StartDoWork(bool writeToConsole)
+        internal void StartDoWork()
         {
             while (true)
             {
@@ -22,10 +22,9 @@ namespace ExchangeQuotes.Server
 
                 _exchangeQuotesSender.SendData(data);
 
-                if (writeToConsole)
-                {
-                    Console.WriteLine(data.ToString());
-                }
+#if DEBUG
+                Console.WriteLine(data.ToString());
+#endif
             }
         }
     }

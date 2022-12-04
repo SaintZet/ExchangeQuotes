@@ -1,0 +1,39 @@
+﻿using ExchangeQuotes.Core.Abstractions;
+using ExchangeQuotes.Core.Communication;
+using ExchangeQuotes.Core.Сonfiguration;
+using ExchangeQuotes.Server.Abstractions;
+using ExchangeQuotes.Server.Models;
+using ExchangeQuotes.Server.Services;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace ExchangeQuotes.Server
+{
+    internal class Startup
+    {
+        public Startup()
+        {
+            Configuration = LoadConfiguration(new XmlConfigProvider<Config>("ServerConfig.xml"));
+        }
+
+        public Config Configuration { get; }
+
+        public IServiceProvider ConfigureServices()
+        {
+            var services = new ServiceCollection()
+
+            .AddSingleton<IExchangeQuotesProvider>(new RandomExchangeQuotesGenerator(Configuration.MinValue, Configuration.MaxValue))
+            .AddSingleton<IExchangeQuotesSender>(new UdpClientWrapper(Configuration.Port, Configuration.MulticastIPAddress))
+            .AddSingleton(s => new Application(s.GetRequiredService<IExchangeQuotesSender>(), s.GetRequiredService<IExchangeQuotesProvider>()))
+            ;
+
+            var serviceProvider = services.BuildServiceProvider();
+
+            return serviceProvider;
+        }
+
+        private Config LoadConfiguration(IConfigProvider<Config> configProvider)
+        {
+            return configProvider.GetOrCreateDefaultConfig();
+        }
+    }
+}

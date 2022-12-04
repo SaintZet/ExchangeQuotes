@@ -25,9 +25,7 @@ namespace ExchangeQuotes.Client.Services
         {
             while (true)
             {
-                var key = Console.ReadKey();
-
-                if (key.Key == ConsoleKey.Enter)
+                if (Console.ReadKey().Key == ConsoleKey.Enter)
                 {
                     RequestedData?.Invoke(this, new EventArgs());
                 }
