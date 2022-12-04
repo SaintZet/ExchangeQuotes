@@ -10,17 +10,18 @@ namespace ExchangeQuotes.Core.Communication
         protected IPEndPoint _localEndPoint;
         protected IPEndPoint _remoteEndPoint;
 
-        public UdpClientWrapper(int port, IPAddress multicastIPAddress, IPAddress? localIPAddress = null)
+        public UdpClientWrapper(int port, string multicastIPAddress, string? localIPAddress = null)
         {
-            _remoteEndPoint = new IPEndPoint(multicastIPAddress, port);
+            IPAddress multicastIp = IPAddress.Parse(multicastIPAddress);
+            IPAddress localIp = string.IsNullOrEmpty(localIPAddress) ? IPAddress.Any : IPAddress.Parse(localIPAddress);
 
-            localIPAddress ??= IPAddress.Any;
-            _localEndPoint = new IPEndPoint(localIPAddress, port);
+            _remoteEndPoint = new IPEndPoint(multicastIp, port);
+            _localEndPoint = new IPEndPoint(localIp, port);
 
             _udpclient = CreateAndConfigureUdpClient();
 
             _udpclient.Client.Bind(_localEndPoint);
-            _udpclient.JoinMulticastGroup(multicastIPAddress, localIPAddress);
+            _udpclient.JoinMulticastGroup(multicastIp, localIp);
         }
 
         private UdpClient CreateAndConfigureUdpClient()

@@ -1,6 +1,8 @@
-﻿using ExchangeQuotes.Server.Abstractions;
+﻿using ExchangeQuotes.Core.Abstractions;
+using ExchangeQuotes.Core.Сonfiguration;
+using ExchangeQuotes.Server.Abstractions;
+using ExchangeQuotes.Server.Models;
 using ExchangeQuotes.Server.Services;
-using System.Net;
 
 namespace ExchangeQuotes.Server
 {
@@ -8,15 +10,13 @@ namespace ExchangeQuotes.Server
     {
         private static void Main(string[] args)
         {
-            int port = 2222;
-            IPAddress multicastIPAddress = IPAddress.Parse("239.0.0.222");
+            IConfigProvider<Config> configPrivider = new XmlConfigProvider<Config>("ServerConfig.xml");
 
-            IExchangeQuotesSender server = new UdpMulticastSender(port, multicastIPAddress);
+            var config = configPrivider.GetOrCreateDefaultConfig();
 
-            double minRnd = 0.0001;
-            double maxRnd = 10000;
+            IExchangeQuotesSender server = new UdpMulticastSender(config.Port, config.MulticastIPAddress);
 
-            IExchangeQuotesProvider exchangeQuotesProvider = new RandomExchangeQuotesGenerator(minRnd, maxRnd);
+            IExchangeQuotesProvider exchangeQuotesProvider = new RandomExchangeQuotesGenerator(config.MinValue, config.MaxValue);
 
             while (true)
             {

@@ -1,6 +1,8 @@
 ﻿using ExchangeQuotes.Client.Abstractions;
+using ExchangeQuotes.Client.Models;
 using ExchangeQuotes.Client.Services;
-using System.Net;
+using ExchangeQuotes.Core.Abstractions;
+using ExchangeQuotes.Core.Сonfiguration;
 
 namespace ExchangeQuotes.Client
 {
@@ -8,12 +10,13 @@ namespace ExchangeQuotes.Client
     {
         private static void Main(string[] args)
         {
-            int port = 2222;
-            IPAddress multicastIPAddress = IPAddress.Parse("239.0.0.222");
+            IConfigProvider<Config> configPrivider = new XmlConfigProvider<Config>("ClientConfig.xml");
+
+            var config = configPrivider.GetOrCreateDefaultConfig();
+
+            IExchangeQuotesReceiver client = new UdpMulticastReceiver(config.Port, config.MulticastIPAddress);
 
             IExchangeQuotesCalculateWorker calcWorker = new ExchangeQuotesCalculateStatistic();
-
-            IExchangeQuotesReceiver client = new UdpMulticastReceiver(port, multicastIPAddress);
 
             client.SetReceiveHandler(calcWorker.CalculateValues);
 

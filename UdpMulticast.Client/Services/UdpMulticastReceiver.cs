@@ -8,7 +8,7 @@ namespace ExchangeQuotes.Client.Services
     {
         private Action<byte[]>? _receiveHandler;
 
-        public UdpMulticastReceiver(int port, IPAddress multicastIPAddress, IPAddress? localIPAddress = null)
+        public UdpMulticastReceiver(int port, string multicastIPAddress, string? localIPAddress = null)
                     : base(port, multicastIPAddress, localIPAddress)
         {
         }
