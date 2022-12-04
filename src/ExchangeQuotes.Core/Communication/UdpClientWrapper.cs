@@ -3,7 +3,7 @@ using System.Net.Sockets;
 
 namespace ExchangeQuotes.Core.Communication
 {
-    public class UdpClientWrapper
+    public class UdpClientWrapper : IDisposable
     {
         protected UdpClient _udpclient;
 
@@ -22,6 +22,11 @@ namespace ExchangeQuotes.Core.Communication
 
             _udpclient.Client.Bind(_localEndPoint);
             _udpclient.JoinMulticastGroup(multicastIp, localIp);
+        }
+
+        public void Dispose()
+        {
+            _udpclient.Close();
         }
 
         private UdpClient CreateAndConfigureUdpClient()

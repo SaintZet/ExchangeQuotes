@@ -28,9 +28,6 @@ namespace ExchangeQuotes.Client.Services
 
         public ExchangeQuotesStatistic GetCurrentValues()
         {
-            //int managedThreadId = Environment.CurrentManagedThreadId;
-            //Console.WriteLine("GetValues: " + managedThreadId);
-
             return new()
             {
                 Average = _averageCalculator.GetCurrentResult(),
@@ -42,17 +39,12 @@ namespace ExchangeQuotes.Client.Services
 
         public void CalculateValues(byte[] bytes)
         {
-            //int managedThreadId = Environment.CurrentManagedThreadId;
-            //Console.WriteLine("CalculateValues: " + managedThreadId);
-
             var exchangeQuote = BitConverter.ToDouble(bytes!, 0);
 
             foreach (var calculator in _statisticCalculators)
             {
                 calculator.AddNumberToSequence(exchangeQuote);
             }
-
-            Console.WriteLine(exchangeQuote.ToString());
         }
     }
 }

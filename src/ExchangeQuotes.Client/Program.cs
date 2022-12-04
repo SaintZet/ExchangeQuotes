@@ -3,6 +3,7 @@ using ExchangeQuotes.Client.Models;
 using ExchangeQuotes.Client.Services;
 using ExchangeQuotes.Core.Abstractions;
 using ExchangeQuotes.Core.Сonfiguration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ExchangeQuotes.Client
 {
@@ -10,29 +11,33 @@ namespace ExchangeQuotes.Client
     {
         private static void Main(string[] args)
         {
-            IConfigProvider<Config> configPrivider = new XmlConfigProvider<Config>("ClientConfig.xml");
+            var config = LoadConfiguration(new XmlConfigProvider<Config>("ClientConfig.xml"));
+            var provider = ConfigureServices(config);
+            var app = provider.GetRequiredService<Application>();
 
-            var config = configPrivider.GetOrCreateDefaultConfig();
+            app.StartDoWork(config.TaskDelay);
+        }
 
-            IExchangeQuotesReceiver client = new UdpMulticastReceiver(config.Port, config.MulticastIPAddress);
+        private static Config LoadConfiguration(IConfigProvider<Config> configProvider)
+        {
+            return configProvider.GetOrCreateDefaultConfig();
+        }
 
-            IExchangeQuotesCalculateWorker calcWorker = new ExchangeQuotesCalculateStatistic();
+        private static IServiceProvider ConfigureServices(Config config)
+        {
+            var services = new ServiceCollection()
 
-            client.SetReceiveHandler(calcWorker.CalculateValues);
+            .AddSingleton<IExchangeQuotesCalculateWorker, ExchangeQuotesCalculateStatistic>()
+            .AddSingleton<IExchangeQuotesView, ExchangeQuotesConsole>()
+            .AddSingleton<IExchangeQuotesReceiver>(new UdpMulticastReceiver(config.Port, config.MulticastIPAddress))
+            .AddSingleton(s => new Application(s.GetRequiredService<IExchangeQuotesReceiver>(),
+                                                s.GetRequiredService<IExchangeQuotesCalculateWorker>(),
+                                                s.GetRequiredService<IExchangeQuotesView>()))
+            ;
 
-            var threadRecive = new Thread(new ThreadStart(() => client.StartListeningIncomingData()));
-            threadRecive.Start();
+            var serviceProvider = services.BuildServiceProvider();
 
-            while (true)
-            {
-                var key = Console.ReadKey();
-
-                if (key.Key == ConsoleKey.Enter)
-                {
-                    var statistic = calcWorker.GetCurrentValues();
-                    Console.WriteLine($"Average: {statistic.Average}\n");
-                }
-            }
+            return serviceProvider;
         }
     }
 }

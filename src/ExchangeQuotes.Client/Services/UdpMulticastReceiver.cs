@@ -6,12 +6,12 @@ namespace ExchangeQuotes.Client.Services
 {
     internal class UdpMulticastReceiver : UdpClientWrapper, IExchangeQuotesReceiver
     {
-        private Action<byte[]>? _receiveHandler;
-
         public UdpMulticastReceiver(int port, string multicastIPAddress, string? localIPAddress = null)
                     : base(port, multicastIPAddress, localIPAddress)
         {
         }
+
+        public event EventHandler? DataReceived;
 
         public int PacketLoss { get; set; }
 
@@ -20,23 +20,20 @@ namespace ExchangeQuotes.Client.Services
             _udpclient.BeginReceive(new AsyncCallback(ReceivedCallback), null);
         }
 
-        public void SetReceiveHandler(Action<byte[]> action)
-        {
-            _receiveHandler = action;
-        }
-
         private void ReceivedCallback(IAsyncResult asyncResult)
         {
             IPEndPoint sender = new(0, 0);
 
             byte[] receivedBytes = _udpclient.EndReceive(asyncResult, ref sender!);
 
-            if (_receiveHandler is not null)
-            {
-                _receiveHandler(receivedBytes);
-            }
+            DataReceived?.Invoke(this, new ReceivedEventArgs() { Data = receivedBytes });
 
             _udpclient.BeginReceive(new AsyncCallback(ReceivedCallback), null);
+        }
+
+        internal class ReceivedEventArgs : EventArgs
+        {
+            public byte[]? Data { get; set; }
         }
     }
 }

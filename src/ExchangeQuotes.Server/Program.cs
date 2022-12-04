@@ -3,6 +3,7 @@ using ExchangeQuotes.Core.Сonfiguration;
 using ExchangeQuotes.Server.Abstractions;
 using ExchangeQuotes.Server.Models;
 using ExchangeQuotes.Server.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ExchangeQuotes.Server
 {
@@ -10,22 +11,29 @@ namespace ExchangeQuotes.Server
     {
         private static void Main(string[] args)
         {
-            IConfigProvider<Config> configPrivider = new XmlConfigProvider<Config>("ServerConfig.xml");
+            var config = LoadConfiguration(new XmlConfigProvider<Config>("ClientConfig.xml"));
+            var provider = ConfigureServices(config);
+            var app = provider.GetRequiredService<Application>();
 
-            var config = configPrivider.GetOrCreateDefaultConfig();
+            app.StartDoWork(true);
+        }
 
-            IExchangeQuotesSender server = new UdpMulticastSender(config.Port, config.MulticastIPAddress);
+        private static Config LoadConfiguration(IConfigProvider<Config> configProvider)
+        {
+            return configProvider.GetOrCreateDefaultConfig();
+        }
 
-            IExchangeQuotesProvider exchangeQuotesProvider = new RandomExchangeQuotesGenerator(config.MinValue, config.MaxValue);
+        private static IServiceProvider ConfigureServices(Config config)
+        {
+            var services = new ServiceCollection()
+            .AddSingleton<IExchangeQuotesProvider>(new RandomExchangeQuotesGenerator(config.MinValue, config.MaxValue))
+            .AddSingleton<IExchangeQuotesSender>(new UdpMulticastSender(config.Port, config.MulticastIPAddress))
+            .AddSingleton(s => new Application(s.GetRequiredService<IExchangeQuotesSender>(), s.GetRequiredService<IExchangeQuotesProvider>()))
+            ;
 
-            while (true)
-            {
-                double data = exchangeQuotesProvider.CurrentExchangeQuote();
+            var serviceProvider = services.BuildServiceProvider();
 
-                server.SendData(data);
-
-                Console.WriteLine(data.ToString());
-            }
+            return serviceProvider;
         }
     }
 }
