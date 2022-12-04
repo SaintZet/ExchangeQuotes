@@ -8,7 +8,7 @@ namespace ExchangeQuotes.Client.Services
     {
         public event EventHandler? RequestedData;
 
-        public void DisplayData(ExchangeQuotesStatistic data, int packetLoss)
+        public void DisplayData(ExchangeQuotesStatistic data, long packetLoss)
         {
             StringBuilder stringBuilder = new();
             stringBuilder.AppendLine($"Average: {data.Average}");
@@ -21,7 +21,7 @@ namespace ExchangeQuotes.Client.Services
             Console.WriteLine(stringBuilder.ToString());
         }
 
-        public void StartWork()
+        public void StartDoWork()
         {
             while (true)
             {

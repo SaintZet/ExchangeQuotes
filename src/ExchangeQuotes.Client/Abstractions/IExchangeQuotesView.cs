@@ -4,10 +4,10 @@ namespace ExchangeQuotes.Client.Abstractions
 {
     internal interface IExchangeQuotesView
     {
-        public event EventHandler? RequestedData;
+        event EventHandler? RequestedData;
 
-        void StartWork();
+        void StartDoWork();
 
-        void DisplayData(ExchangeQuotesStatistic data, int packetLoss);
+        void DisplayData(ExchangeQuotesStatistic data, long packetLoss);
     }
 }

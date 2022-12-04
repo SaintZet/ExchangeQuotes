@@ -4,8 +4,8 @@ namespace ExchangeQuotes.Client.Abstractions
 {
     internal interface IExchangeQuotesCalculateWorker
     {
-        public ExchangeQuotesStatistic GetCurrentValues();
+        ExchangeQuotesStatistic GetCurrentValues();
 
-        public void CalculateValues(byte[] bytes);
+        void CalculateValues(byte[] bytes);
     }
 }

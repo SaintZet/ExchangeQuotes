@@ -2,6 +2,7 @@
 using ExchangeQuotes.Client.Models;
 using ExchangeQuotes.Client.Services;
 using ExchangeQuotes.Core.Abstractions;
+using ExchangeQuotes.Core.Communication;
 using ExchangeQuotes.Core.Сonfiguration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -29,7 +30,7 @@ namespace ExchangeQuotes.Client
 
             .AddSingleton<IExchangeQuotesCalculateWorker, ExchangeQuotesCalculateStatistic>()
             .AddSingleton<IExchangeQuotesView, ExchangeQuotesConsole>()
-            .AddSingleton<IExchangeQuotesReceiver>(new UdpMulticastReceiver(config.Port, config.MulticastIPAddress))
+            .AddSingleton<IExchangeQuotesReceiver>(new UdpClientWrapper(config.Port, config.MulticastIPAddress))
             .AddSingleton(s => new Application(s.GetRequiredService<IExchangeQuotesReceiver>(),
                                                 s.GetRequiredService<IExchangeQuotesCalculateWorker>(),
                                                 s.GetRequiredService<IExchangeQuotesView>()))

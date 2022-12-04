@@ -1,4 +1,5 @@
 ﻿using ExchangeQuotes.Core.Abstractions;
+using ExchangeQuotes.Core.Communication;
 using ExchangeQuotes.Core.Сonfiguration;
 using ExchangeQuotes.Server.Abstractions;
 using ExchangeQuotes.Server.Models;
@@ -11,7 +12,7 @@ namespace ExchangeQuotes.Server
     {
         private static void Main(string[] args)
         {
-            var config = LoadConfiguration(new XmlConfigProvider<Config>("ClientConfig.xml"));
+            var config = LoadConfiguration(new XmlConfigProvider<Config>("ServerConfig.xml"));
             var provider = ConfigureServices(config);
             var app = provider.GetRequiredService<Application>();
 
@@ -27,7 +28,7 @@ namespace ExchangeQuotes.Server
         {
             var services = new ServiceCollection()
             .AddSingleton<IExchangeQuotesProvider>(new RandomExchangeQuotesGenerator(config.MinValue, config.MaxValue))
-            .AddSingleton<IExchangeQuotesSender>(new UdpMulticastSender(config.Port, config.MulticastIPAddress))
+            .AddSingleton<IExchangeQuotesSender>(new UdpClientWrapper(config.Port, config.MulticastIPAddress))
             .AddSingleton(s => new Application(s.GetRequiredService<IExchangeQuotesSender>(), s.GetRequiredService<IExchangeQuotesProvider>()))
             ;
 

@@ -1,5 +1,6 @@
 ﻿using ExchangeQuotes.Client.Abstractions;
-using static ExchangeQuotes.Client.Services.UdpMulticastReceiver;
+using ExchangeQuotes.Core.Abstractions;
+using ExchangeQuotes.Core.Communication;
 
 namespace ExchangeQuotes.Client
 {
@@ -19,23 +20,20 @@ namespace ExchangeQuotes.Client
         internal void StartDoWork(int workDelay = 0)
         {
             _exchangeQuotesReceiver!.DataReceived += DataReciveHandler;
-
-            var threadRecive = new Thread(new ThreadStart(() => _exchangeQuotesReceiver.StartListeningIncomingData()));
-            threadRecive.Start();
-
-            _exchangeQuotesView.RequestedData += DataRequestedHandler;
-            _exchangeQuotesView.StartWork();
+            _exchangeQuotesReceiver.StartListeningIncomingData();
 
             var timer = new Timer(ReciverDelay!, workDelay, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+
+            _exchangeQuotesView.RequestedData += DataRequestedHandler;
+            _exchangeQuotesView.StartDoWork();
         }
 
+        //Emulate packet delay
         private void ReciverDelay(object delay)
         {
-            _exchangeQuotesReceiver!.DataReceived -= DataReciveHandler;
-
+            _exchangeQuotesReceiver.RecivePause = true;
             Thread.Sleep((int)delay);
-
-            _exchangeQuotesReceiver!.DataReceived += DataReciveHandler;
+            _exchangeQuotesReceiver.RecivePause = false;
         }
 
         private void DataReciveHandler(object? sender, EventArgs e)

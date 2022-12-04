@@ -2,8 +2,8 @@
 {
     public interface IConfigProvider<T> where T : new()
     {
-        public T GetOrCreateDefaultConfig();
+        T GetOrCreateDefaultConfig();
 
-        public void CreateDefaultConfig();
+        void CreateDefaultConfig();
     }
 }

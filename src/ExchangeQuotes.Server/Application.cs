@@ -1,4 +1,5 @@
-﻿using ExchangeQuotes.Server.Abstractions;
+﻿using ExchangeQuotes.Core.Abstractions;
+using ExchangeQuotes.Server.Abstractions;
 
 namespace ExchangeQuotes.Server
 {
