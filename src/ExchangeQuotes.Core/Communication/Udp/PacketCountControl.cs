@@ -1,4 +1,4 @@
-﻿namespace ExchangeQuotes.Core.Communication
+﻿namespace ExchangeQuotes.Core.Communication.Udp
 {
     internal class PacketCountControl
     {

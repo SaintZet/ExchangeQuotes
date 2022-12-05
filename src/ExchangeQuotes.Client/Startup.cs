@@ -2,7 +2,7 @@
 using ExchangeQuotes.Client.Models;
 using ExchangeQuotes.Client.Services;
 using ExchangeQuotes.Core.Abstractions;
-using ExchangeQuotes.Core.Communication;
+using ExchangeQuotes.Core.Communication.Udp;
 using ExchangeQuotes.Core.Сonfiguration;
 using Microsoft.Extensions.DependencyInjection;
 

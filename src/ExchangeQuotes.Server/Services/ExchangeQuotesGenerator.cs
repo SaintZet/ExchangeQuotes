@@ -6,19 +6,17 @@ internal class RandomExchangeQuotesGenerator : IExchangeQuotesProvider
 {
     private readonly Random _random = new();
 
-    private readonly double _minValue;
-    private readonly double _maxValue;
+    private readonly int _minValue;
+    private readonly int _maxValue;
 
-    public RandomExchangeQuotesGenerator(double minValue, double maxValue)
+    public RandomExchangeQuotesGenerator(int minValue, int maxValue)
     {
         _minValue = minValue;
         _maxValue = maxValue;
     }
 
-    public double CurrentExchangeQuote()
+    public int CurrentExchangeQuote()
     {
-        var random = _minValue + (_random.NextDouble() * (_maxValue - _minValue));
-
-        return Math.Round(random, 4);
+        return _random.Next(_minValue, _maxValue);
     }
 }

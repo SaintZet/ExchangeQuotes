@@ -25,12 +25,10 @@ internal class ExchangeQuotesConsole : IExchangeQuotesView
     {
         while (true)
         {
-            RequestedData?.Invoke(this, new EventArgs());
-
-            //if (Console.ReadKey().Key == ConsoleKey.Enter)
-            //{
-            //    RequestedData?.Invoke(this, new EventArgs());
-            //}
+            if (Console.ReadKey().Key == ConsoleKey.Enter)
+            {
+                RequestedData?.Invoke(this, new EventArgs());
+            }
         }
     }
 }

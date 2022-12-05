@@ -2,7 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 
-namespace ExchangeQuotes.Core.Communication;
+namespace ExchangeQuotes.Core.Communication.Udp;
 
 public sealed class UdpClientWrapper : IDisposable, IExchangeQuotesReceiver, IExchangeQuotesSender
 {
@@ -21,11 +21,17 @@ public sealed class UdpClientWrapper : IDisposable, IExchangeQuotesReceiver, IEx
         IPAddress localIp = string.IsNullOrEmpty(localIPAddress) ? IPAddress.Any : IPAddress.Parse(localIPAddress);
 
         _remoteEndPoint = new IPEndPoint(multicastIp, port);
+
+        _udpclient = new UdpClient
+        {
+            ExclusiveAddressUse = false
+        };
+
+        _udpclient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+
         var localEndPoint = new IPEndPoint(localIp, port);
-
-        _udpclient = CreateAndConfigureUdpClient();
-
         _udpclient.Client.Bind(localEndPoint);
+
         _udpclient.JoinMulticastGroup(multicastIp, localIp);
     }
 
@@ -36,9 +42,9 @@ public sealed class UdpClientWrapper : IDisposable, IExchangeQuotesReceiver, IEx
 
     public long PacketLoss => _packetCountChecker.PacketLoss;
 
-    public void SendData(double data)
+    public void SendData(int data)
     {
-        byte[] dgram = new byte[16];
+        byte[] dgram = new byte[12];
 
         byte[] packetNumber = BitConverter.GetBytes(_packetCountChecker.LastSendedPacketNumber);
         byte[] dataBytes = BitConverter.GetBytes(data);
@@ -54,24 +60,13 @@ public sealed class UdpClientWrapper : IDisposable, IExchangeQuotesReceiver, IEx
     public void StartListeningIncomingData()
     {
         _callBack = new AsyncCallback(ReceivedCallback);
+
         _udpclient.BeginReceive(_callBack, null);
     }
 
     public void Dispose()
     {
         _udpclient.Close();
-    }
-
-    private UdpClient CreateAndConfigureUdpClient()
-    {
-        var udpClient = new UdpClient();
-
-        // The following three lines allow multiple clients on the same PC
-        udpClient.ExclusiveAddressUse = false;
-        udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-        udpClient.ExclusiveAddressUse = false;
-
-        return udpClient;
     }
 
     private void ReceivedCallback(IAsyncResult asyncResult)
@@ -89,7 +84,6 @@ public sealed class UdpClientWrapper : IDisposable, IExchangeQuotesReceiver, IEx
     /// <param name="receivedBytes">Recived bytes.</param>
     private async void InvokeHandlerAsync(byte[] receivedBytes)
     {
-        //Debug.WriteLine(Environment.CurrentManagedThreadId);
         //Emulate packet delay
         if (RecivePause)
         {
@@ -97,7 +91,7 @@ public sealed class UdpClientWrapper : IDisposable, IExchangeQuotesReceiver, IEx
         }
 
         byte[] packetNumber = receivedBytes.Take(8).ToArray();
-        byte[] data = receivedBytes.TakeLast(8).ToArray();
+        byte[] data = receivedBytes.TakeLast(4).ToArray();
 
         _packetCountChecker.ReceivedPacketNumber(packetNumber);
         _receivedEventArgs.Data = data;

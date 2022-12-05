@@ -1,32 +1,27 @@
 ﻿using ExchangeQuotes.Math.Abstractions;
+using System.Collections.Concurrent;
 
 namespace ExchangeQuotes.Math.Statistic;
 
-public class ModeCalculator : IStatisticCalculator
+public class ModeCalculator : IStatisticThreadSafeCalculator
 {
-    private readonly Dictionary<double, int> _sequence = new();
+    private readonly ConcurrentDictionary<double, long> _sequence = new();
 
-    public void AddNumberToSequence(double number)
+    public void AddNumberToSequence(int number)
     {
-        if (_sequence.ContainsKey(number))
+        if (!_sequence.TryAdd(number, 1))
         {
             _sequence[number] = _sequence[number] + 1;
-        }
-        else
-        {
-            _sequence.Add(number, 1);
         }
     }
 
     public double GetCurrentResult()
     {
-        if (_sequence.Count == 0)
+        if (_sequence.IsEmpty)
         {
             return 0;
         }
 
-        Dictionary<double, int> copy = new(_sequence);
-
-        return copy.Aggregate((x, y) => x.Value > y.Value ? x : y).Key;
+        return _sequence.Aggregate((x, y) => x.Value > y.Value ? x : y).Key;
     }
 }

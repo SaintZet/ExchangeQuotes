@@ -2,5 +2,5 @@
 
 internal interface IExchangeQuotesProvider
 {
-    double CurrentExchangeQuote();
+    int CurrentExchangeQuote();
 }

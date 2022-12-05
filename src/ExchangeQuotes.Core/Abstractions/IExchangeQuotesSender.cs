@@ -2,5 +2,5 @@
 
 public interface IExchangeQuotesSender
 {
-    void SendData(double exchangeQuotes);
+    void SendData(int exchangeQuotes);
 }

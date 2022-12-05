@@ -2,13 +2,13 @@
 
 namespace ExchangeQuotes.Math.Statistic;
 
-public class StandardDeviationCalculator : IStatisticCalculator
+public class StandardDeviationCalculator : IStatisticThreadSafeCalculator
 {
     private int _count;
     private double _mean;
     private double _dSquared;
 
-    public void AddNumberToSequence(double number)
+    public void AddNumberToSequence(int number)
     {
         _count++;
 

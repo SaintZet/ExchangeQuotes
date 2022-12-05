@@ -1,6 +1,6 @@
 ﻿using ExchangeQuotes.Client.Abstractions;
 using ExchangeQuotes.Core.Abstractions;
-using ExchangeQuotes.Core.Communication;
+using ExchangeQuotes.Core.Communication.Udp;
 
 namespace ExchangeQuotes.Client.Services;
 
@@ -20,9 +20,7 @@ internal class Application
     internal void StartDoWork(int workDelay = 0)
     {
         _exchangeQuotesReceiver!.DataReceived += DataReciveHandler;
-
-        var thread = new Thread(new ThreadStart(_exchangeQuotesReceiver.StartListeningIncomingData));
-        thread.Start();
+        _exchangeQuotesReceiver.StartListeningIncomingData();
 
         var timer = new Timer(ReciverDelay!, workDelay, TimeSpan.Zero, TimeSpan.FromSeconds(1));
 
@@ -35,7 +33,7 @@ internal class Application
     {
         int ms = (int)delay;
 
-        if (delay == null)
+        if (ms == 0)
         {
             return;
         }

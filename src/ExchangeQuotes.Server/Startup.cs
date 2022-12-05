@@ -1,5 +1,5 @@
 ﻿using ExchangeQuotes.Core.Abstractions;
-using ExchangeQuotes.Core.Communication;
+using ExchangeQuotes.Core.Communication.Udp;
 using ExchangeQuotes.Core.Сonfiguration;
 using ExchangeQuotes.Server.Abstractions;
 using ExchangeQuotes.Server.Models;

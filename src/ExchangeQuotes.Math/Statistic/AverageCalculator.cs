@@ -2,17 +2,33 @@
 
 namespace ExchangeQuotes.Math.Statistic;
 
-public class AverageCalculator : IStatisticCalculator
+public class AverageCalculator : IStatisticThreadSafeCalculator
 {
-    private double _currentResult;
-    private int _count;
+    private volatile object _currentResult;
+    private volatile object _count;
 
-    public void AddNumberToSequence(double number)
+    public AverageCalculator()
     {
-        double k = _count + 1;
-        _currentResult = ((_count / k) * _currentResult) + (number / k);
-        _count++;
+        _currentResult = 0.0;
+        _count = 0;
     }
 
-    public double GetCurrentResult() => _currentResult;
+    public void AddNumberToSequence(int number)
+    {
+        int currentCount = (int)_count;
+        int newCount = currentCount + 1;
+
+        double currentResult = (double)_currentResult;
+        double x = ((double)number / (double)newCount);
+        double y = ((double)currentCount / (double)newCount);
+        double newResult = (y * currentResult) + x;
+
+        _currentResult = (object)newResult;
+        _count = (object)newCount;
+    }
+
+    public double GetCurrentResult()
+    {
+        return (double)_currentResult;
+    }
 }

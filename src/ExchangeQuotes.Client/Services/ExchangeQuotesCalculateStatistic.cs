@@ -7,8 +7,8 @@ namespace ExchangeQuotes.Client.Services;
 
 internal class ExchangeQuotesCalculateStatistic : IExchangeQuotesCalculateWorker
 {
-    private readonly IStatisticCalculator _averageCalculator, _standardDeviationCalculator, _modeCalculator, _medianCalculator;
-    private readonly IList<IStatisticCalculator> _statisticCalculators;
+    private readonly IStatisticThreadSafeCalculator _averageCalculator, _standardDeviationCalculator, _modeCalculator, _medianCalculator;
+    private readonly List<IStatisticThreadSafeCalculator> _statisticCalculators;
 
     public ExchangeQuotesCalculateStatistic()
     {
@@ -17,7 +17,7 @@ internal class ExchangeQuotesCalculateStatistic : IExchangeQuotesCalculateWorker
         _modeCalculator = new ModeCalculator();
         _medianCalculator = new MedianCalculator();
 
-        _statisticCalculators = new List<IStatisticCalculator>
+        _statisticCalculators = new List<IStatisticThreadSafeCalculator>
         {
             _averageCalculator,
             _standardDeviationCalculator,
@@ -26,24 +26,18 @@ internal class ExchangeQuotesCalculateStatistic : IExchangeQuotesCalculateWorker
         };
     }
 
-    public ExchangeQuotesStatistic GetCurrentValues()
+    public ExchangeQuotesStatistic GetCurrentValues() => new()
     {
-        return new()
-        {
-            Average = _averageCalculator.GetCurrentResult(),
-            Median = _medianCalculator.GetCurrentResult(),
-            Mode = _modeCalculator.GetCurrentResult(),
-            StandardDeviation = _standardDeviationCalculator.GetCurrentResult(),
-        };
-    }
+        Average = _averageCalculator.GetCurrentResult(),
+        Median = _medianCalculator.GetCurrentResult(),
+        Mode = _modeCalculator.GetCurrentResult(),
+        StandardDeviation = _standardDeviationCalculator.GetCurrentResult(),
+    };
 
     public void CalculateValues(byte[] bytes)
     {
-        var exchangeQuote = BitConverter.ToDouble(bytes!, 0);
+        var exchangeQuote = BitConverter.ToInt32(bytes!, 0);
 
-        foreach (var calculator in _statisticCalculators)
-        {
-            calculator.AddNumberToSequence(exchangeQuote);
-        }
+        _statisticCalculators.ForEach(c => c.AddNumberToSequence(exchangeQuote));
     }
 }
