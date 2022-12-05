@@ -1,31 +1,31 @@
 ﻿using ExchangeQuotes.Math.Abstractions;
 
-namespace ExchangeQuotes.Math.Statistic
+namespace ExchangeQuotes.Math.Statistic;
+
+public class StandardDeviationCalculator : IStatisticCalculator
 {
-    public class StandardDeviationCalculator : IStatisticCalculator
+    private int _count;
+    private double _mean;
+    private double _dSquared;
+
+    public void AddNumberToSequence(double number)
     {
-        private int _count;
-        private double _mean;
-        private double _dSquared;
+        _count++;
 
-        public void AddNumberToSequence(double number)
-        {
-            _count++;
+        var meanDifferential = (number - _mean) / _count;
 
-            var meanDifferential = (number - _mean) / _count;
+        var newMean = _mean + meanDifferential;
 
-            var newMean = _mean + meanDifferential;
+        var dSquaredIncrement = (number - newMean) * (number - _mean);
 
-            var dSquaredIncrement = (number - newMean) * (number - _mean);
+        var newDSquared = _dSquared + dSquaredIncrement;
 
-            var newDSquared = _dSquared + dSquaredIncrement;
+        _mean = newMean;
 
-            _mean = newMean;
-            _dSquared = newDSquared;
-        }
-
-        public double GetCurrentResult() => System.Math.Sqrt(SampleVariance());
-
-        public double SampleVariance() => _count > 1 ? _dSquared / (_count - 1) : 0;
+        _dSquared = newDSquared;
     }
+
+    public double GetCurrentResult() => System.Math.Sqrt(SampleVariance());
+
+    public double SampleVariance() => _count > 1 ? _dSquared / (_count - 1) : 0;
 }

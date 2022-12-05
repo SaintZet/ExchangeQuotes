@@ -1,13 +1,12 @@
 ﻿using ExchangeQuotes.Client.Models;
 
-namespace ExchangeQuotes.Client.Abstractions
+namespace ExchangeQuotes.Client.Abstractions;
+
+internal interface IExchangeQuotesView
 {
-    internal interface IExchangeQuotesView
-    {
-        event EventHandler? RequestedData;
+    event EventHandler? RequestedData;
 
-        void StartDoWork();
+    void StartDoWork();
 
-        void DisplayData(ExchangeQuotesStatistic data, long packetLoss);
-    }
+    void DisplayData(ExchangeQuotesStatistic data, long packetLoss);
 }

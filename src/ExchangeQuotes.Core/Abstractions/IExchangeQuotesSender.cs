@@ -1,7 +1,6 @@
-﻿namespace ExchangeQuotes.Core.Abstractions
+﻿namespace ExchangeQuotes.Core.Abstractions;
+
+public interface IExchangeQuotesSender
 {
-    public interface IExchangeQuotesSender
-    {
-        void SendData(double exchangeQuotes);
-    }
+    void SendData(double exchangeQuotes);
 }

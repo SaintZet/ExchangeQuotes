@@ -1,31 +1,30 @@
 ﻿using ExchangeQuotes.Core.Abstractions;
 using ExchangeQuotes.Server.Abstractions;
 
-namespace ExchangeQuotes.Server.Services
+namespace ExchangeQuotes.Server.Services;
+
+internal class Application
 {
-    internal class Application
+    private readonly IExchangeQuotesSender _exchangeQuotesSender;
+    private readonly IExchangeQuotesProvider _exchangeQuotesProvider;
+
+    public Application(IExchangeQuotesSender exchangeQuotesSender, IExchangeQuotesProvider exchangeQuotesProvider)
     {
-        private readonly IExchangeQuotesSender _exchangeQuotesSender;
-        private readonly IExchangeQuotesProvider _exchangeQuotesProvider;
+        _exchangeQuotesSender = exchangeQuotesSender;
+        _exchangeQuotesProvider = exchangeQuotesProvider;
+    }
 
-        public Application(IExchangeQuotesSender exchangeQuotesSender, IExchangeQuotesProvider exchangeQuotesProvider)
+    internal void StartDoWork()
+    {
+        while (true)
         {
-            _exchangeQuotesSender = exchangeQuotesSender;
-            _exchangeQuotesProvider = exchangeQuotesProvider;
-        }
+            double data = _exchangeQuotesProvider.CurrentExchangeQuote();
 
-        internal void StartDoWork()
-        {
-            while (true)
-            {
-                double data = _exchangeQuotesProvider.CurrentExchangeQuote();
-
-                _exchangeQuotesSender.SendData(data);
+            _exchangeQuotesSender.SendData(data);
 
 #if DEBUG
-                Console.WriteLine(data.ToString());
+            Console.WriteLine(data.ToString());
 #endif
-            }
         }
     }
 }

@@ -1,9 +1,8 @@
-﻿namespace ExchangeQuotes.Math.Abstractions
-{
-    public interface IStatisticCalculator
-    {
-        void AddNumberToSequence(double number);
+﻿namespace ExchangeQuotes.Math.Abstractions;
 
-        double GetCurrentResult();
-    }
+public interface IStatisticCalculator
+{
+    void AddNumberToSequence(double number);
+
+    double GetCurrentResult();
 }

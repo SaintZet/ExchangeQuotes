@@ -2,46 +2,45 @@
 using System.Xml;
 using System.Xml.Serialization;
 
-namespace ExchangeQuotes.Core.Сonfiguration
+namespace ExchangeQuotes.Core.Сonfiguration;
+
+public class XmlConfigProvider<T> : IConfigProvider<T> where T : new()
 {
-    public class XmlConfigProvider<T> : IConfigProvider<T> where T : new()
+    private string _pathToConfig;
+
+    public XmlConfigProvider(string pathToConfig)
     {
-        private string _pathToConfig;
+        _pathToConfig = pathToConfig;
+    }
 
-        public XmlConfigProvider(string pathToConfig)
+    public T GetOrCreateDefaultConfig()
+    {
+        if (!File.Exists(_pathToConfig))
         {
-            _pathToConfig = pathToConfig;
+            CreateDefaultConfig();
         }
 
-        public T GetOrCreateDefaultConfig()
-        {
-            if (!File.Exists(_pathToConfig))
-            {
-                CreateDefaultConfig();
-            }
+        XmlSerializer serializer = new(typeof(T));
 
-            XmlSerializer serializer = new(typeof(T));
+        using StreamReader reader = new(_pathToConfig);
 
-            using StreamReader reader = new(_pathToConfig);
+        T config = (T)serializer.Deserialize(reader)!;
 
-            T config = (T)serializer.Deserialize(reader)!;
+        reader.Close();
 
-            reader.Close();
+        return config;
+    }
 
-            return config;
-        }
+    public void CreateDefaultConfig()
+    {
+        T config = new();
 
-        public void CreateDefaultConfig()
-        {
-            T config = new();
+        var xmlWriterSettings = new XmlWriterSettings() { Indent = true };
 
-            var xmlWriterSettings = new XmlWriterSettings() { Indent = true };
+        XmlSerializer serializer = new(typeof(T));
 
-            XmlSerializer serializer = new(typeof(T));
+        using XmlWriter xmlWriter = XmlWriter.Create(_pathToConfig, xmlWriterSettings);
 
-            using XmlWriter xmlWriter = XmlWriter.Create(_pathToConfig, xmlWriterSettings);
-
-            serializer.Serialize(xmlWriter, config);
-        }
+        serializer.Serialize(xmlWriter, config);
     }
 }

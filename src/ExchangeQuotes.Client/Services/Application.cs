@@ -2,52 +2,62 @@
 using ExchangeQuotes.Core.Abstractions;
 using ExchangeQuotes.Core.Communication;
 
-namespace ExchangeQuotes.Client.Services
+namespace ExchangeQuotes.Client.Services;
+
+internal class Application
 {
-    internal class Application
+    private readonly IExchangeQuotesView _exchangeQuotesView;
+    private readonly IExchangeQuotesReceiver _exchangeQuotesReceiver;
+    private readonly IExchangeQuotesCalculateWorker _exchangeQuotesCalculateWorker;
+
+    public Application(IExchangeQuotesReceiver exchangeQuotesReceiver, IExchangeQuotesCalculateWorker exchangeQuotesCalculateWorker, IExchangeQuotesView exchangeQuotesView)
     {
-        private readonly IExchangeQuotesView _exchangeQuotesView;
-        private readonly IExchangeQuotesReceiver _exchangeQuotesReceiver;
-        private readonly IExchangeQuotesCalculateWorker _exchangeQuotesCalculateWorker;
+        _exchangeQuotesReceiver = exchangeQuotesReceiver;
+        _exchangeQuotesCalculateWorker = exchangeQuotesCalculateWorker;
+        _exchangeQuotesView = exchangeQuotesView;
+    }
 
-        public Application(IExchangeQuotesReceiver exchangeQuotesReceiver, IExchangeQuotesCalculateWorker exchangeQuotesCalculateWorker, IExchangeQuotesView exchangeQuotesView)
+    internal void StartDoWork(int workDelay = 0)
+    {
+        _exchangeQuotesReceiver!.DataReceived += DataReciveHandler;
+
+        var thread = new Thread(new ThreadStart(_exchangeQuotesReceiver.StartListeningIncomingData));
+        thread.Start();
+
+        var timer = new Timer(ReciverDelay!, workDelay, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+
+        _exchangeQuotesView.RequestedData += DataRequestedHandler;
+        _exchangeQuotesView.StartDoWork();
+    }
+
+    //Emulate packet delay
+    private void ReciverDelay(object delay)
+    {
+        int ms = (int)delay;
+
+        if (delay == null)
         {
-            _exchangeQuotesReceiver = exchangeQuotesReceiver;
-            _exchangeQuotesCalculateWorker = exchangeQuotesCalculateWorker;
-            _exchangeQuotesView = exchangeQuotesView;
+            return;
         }
 
-        internal void StartDoWork(int workDelay = 0)
-        {
-            _exchangeQuotesReceiver!.DataReceived += DataReciveHandler;
-            _exchangeQuotesReceiver.StartListeningIncomingData();
+        _exchangeQuotesReceiver.RecivePause = true;
 
-            var timer = new Timer(ReciverDelay!, workDelay, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+        Thread.Sleep(ms);
 
-            _exchangeQuotesView.RequestedData += DataRequestedHandler;
-            _exchangeQuotesView.StartDoWork();
-        }
+        _exchangeQuotesReceiver.RecivePause = false;
+    }
 
-        //Emulate packet delay
-        private void ReciverDelay(object delay)
-        {
-            _exchangeQuotesReceiver.RecivePause = true;
-            Thread.Sleep((int)delay);
-            _exchangeQuotesReceiver.RecivePause = false;
-        }
+    private void DataReciveHandler(object? sender, EventArgs e)
+    {
+        ReceivedEventArgs receivedEventArgs = (ReceivedEventArgs)e;
+        _exchangeQuotesCalculateWorker!.CalculateValues(receivedEventArgs.Data!);
+    }
 
-        private void DataReciveHandler(object? sender, EventArgs e)
-        {
-            ReceivedEventArgs receivedEventArgs = (ReceivedEventArgs)e;
-            _exchangeQuotesCalculateWorker!.CalculateValues(receivedEventArgs.Data!);
-        }
+    private void DataRequestedHandler(object? sender, EventArgs e)
+    {
+        var data = _exchangeQuotesCalculateWorker.GetCurrentValues();
+        var packetLoss = _exchangeQuotesReceiver.PacketLoss;
 
-        private void DataRequestedHandler(object? sender, EventArgs e)
-        {
-            var data = _exchangeQuotesCalculateWorker.GetCurrentValues();
-            var packetLoss = _exchangeQuotesReceiver.PacketLoss;
-
-            _exchangeQuotesView.DisplayData(data, packetLoss);
-        }
+        _exchangeQuotesView.DisplayData(data, packetLoss);
     }
 }

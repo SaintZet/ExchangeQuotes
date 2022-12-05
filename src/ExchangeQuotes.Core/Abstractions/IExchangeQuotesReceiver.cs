@@ -1,14 +1,13 @@
-﻿namespace ExchangeQuotes.Core.Abstractions
+﻿namespace ExchangeQuotes.Core.Abstractions;
+
+public interface IExchangeQuotesReceiver
 {
-    public interface IExchangeQuotesReceiver
-    {
-        event EventHandler? DataReceived;
+    event EventHandler? DataReceived;
 
-        //Emulate packet delay
-        bool RecivePause { get; set; }
+    //Emulate packet delay
+    bool RecivePause { get; set; }
 
-        long PacketLoss { get; }
+    long PacketLoss { get; }
 
-        void StartListeningIncomingData();
-    }
+    void StartListeningIncomingData();
 }

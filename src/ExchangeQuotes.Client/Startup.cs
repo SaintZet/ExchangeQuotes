@@ -6,36 +6,35 @@ using ExchangeQuotes.Core.Communication;
 using ExchangeQuotes.Core.Сonfiguration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ExchangeQuotes.Client
+namespace ExchangeQuotes.Client;
+
+internal class Startup
 {
-    internal class Startup
+    public Startup()
     {
-        public Startup()
-        {
-            Configuration = LoadConfiguration(new XmlConfigProvider<Config>("ClientConfig.xml"));
-        }
+        Configuration = LoadConfiguration(new XmlConfigProvider<Config>("ClientConfig.xml"));
+    }
 
-        public Config Configuration { get; }
+    public Config Configuration { get; }
 
-        public IServiceProvider ConfigureServices()
-        {
-            var services = new ServiceCollection()
+    public IServiceProvider ConfigureServices()
+    {
+        var services = new ServiceCollection()
 
-            .AddSingleton<IExchangeQuotesCalculateWorker, ExchangeQuotesCalculateStatistic>()
-            .AddSingleton<IExchangeQuotesView, ExchangeQuotesConsole>()
-            .AddSingleton<IExchangeQuotesReceiver>(new UdpClientWrapper(Configuration.Port, Configuration.MulticastIPAddress))
-            .AddSingleton(s => new Application(
-                s.GetRequiredService<IExchangeQuotesReceiver>(),
-                s.GetRequiredService<IExchangeQuotesCalculateWorker>(),
-                s.GetRequiredService<IExchangeQuotesView>())
-            );
+        .AddSingleton<IExchangeQuotesCalculateWorker, ExchangeQuotesCalculateStatistic>()
+        .AddSingleton<IExchangeQuotesView, ExchangeQuotesConsole>()
+        .AddSingleton<IExchangeQuotesReceiver>(new UdpClientWrapper(Configuration.Port, Configuration.MulticastIPAddress))
+        .AddSingleton(s => new Application(
+            s.GetRequiredService<IExchangeQuotesReceiver>(),
+            s.GetRequiredService<IExchangeQuotesCalculateWorker>(),
+            s.GetRequiredService<IExchangeQuotesView>())
+        );
 
-            return services.BuildServiceProvider();
-        }
+        return services.BuildServiceProvider();
+    }
 
-        private Config LoadConfiguration(IConfigProvider<Config> configProvider)
-        {
-            return configProvider.GetOrCreateDefaultConfig();
-        }
+    private Config LoadConfiguration(IConfigProvider<Config> configProvider)
+    {
+        return configProvider.GetOrCreateDefaultConfig();
     }
 }

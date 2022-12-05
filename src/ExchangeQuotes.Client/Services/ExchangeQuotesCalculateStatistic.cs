@@ -3,48 +3,47 @@ using ExchangeQuotes.Client.Models;
 using ExchangeQuotes.Math.Abstractions;
 using ExchangeQuotes.Math.Statistic;
 
-namespace ExchangeQuotes.Client.Services
+namespace ExchangeQuotes.Client.Services;
+
+internal class ExchangeQuotesCalculateStatistic : IExchangeQuotesCalculateWorker
 {
-    internal class ExchangeQuotesCalculateStatistic : IExchangeQuotesCalculateWorker
+    private readonly IStatisticCalculator _averageCalculator, _standardDeviationCalculator, _modeCalculator, _medianCalculator;
+    private readonly IList<IStatisticCalculator> _statisticCalculators;
+
+    public ExchangeQuotesCalculateStatistic()
     {
-        private readonly IStatisticCalculator _averageCalculator, _standardDeviationCalculator, _modeCalculator, _medianCalculator;
-        private readonly IList<IStatisticCalculator> _statisticCalculators;
+        _averageCalculator = new AverageCalculator();
+        _standardDeviationCalculator = new StandardDeviationCalculator();
+        _modeCalculator = new ModeCalculator();
+        _medianCalculator = new MedianCalculator();
 
-        public ExchangeQuotesCalculateStatistic()
+        _statisticCalculators = new List<IStatisticCalculator>
         {
-            _averageCalculator = new AverageCalculator();
-            _standardDeviationCalculator = new StandardDeviationCalculator();
-            _modeCalculator = new ModeCalculator();
-            _medianCalculator = new MedianCalculator();
+            _averageCalculator,
+            _standardDeviationCalculator,
+            _modeCalculator,
+            _medianCalculator,
+        };
+    }
 
-            _statisticCalculators = new List<IStatisticCalculator>
-            {
-                _averageCalculator,
-                _standardDeviationCalculator,
-                _modeCalculator,
-                _medianCalculator,
-            };
-        }
-
-        public ExchangeQuotesStatistic GetCurrentValues()
+    public ExchangeQuotesStatistic GetCurrentValues()
+    {
+        return new()
         {
-            return new()
-            {
-                Average = _averageCalculator.GetCurrentResult(),
-                Median = _medianCalculator.GetCurrentResult(),
-                Mode = _modeCalculator.GetCurrentResult(),
-                StandardDeviation = _standardDeviationCalculator.GetCurrentResult(),
-            };
-        }
+            Average = _averageCalculator.GetCurrentResult(),
+            Median = _medianCalculator.GetCurrentResult(),
+            Mode = _modeCalculator.GetCurrentResult(),
+            StandardDeviation = _standardDeviationCalculator.GetCurrentResult(),
+        };
+    }
 
-        public void CalculateValues(byte[] bytes)
+    public void CalculateValues(byte[] bytes)
+    {
+        var exchangeQuote = BitConverter.ToDouble(bytes!, 0);
+
+        foreach (var calculator in _statisticCalculators)
         {
-            var exchangeQuote = BitConverter.ToDouble(bytes!, 0);
-
-            foreach (var calculator in _statisticCalculators)
-            {
-                calculator.AddNumberToSequence(exchangeQuote);
-            }
+            calculator.AddNumberToSequence(exchangeQuote);
         }
     }
 }

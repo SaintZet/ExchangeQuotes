@@ -1,7 +1,6 @@
-﻿namespace ExchangeQuotes.Server.Abstractions
+﻿namespace ExchangeQuotes.Server.Abstractions;
+
+internal interface IExchangeQuotesProvider
 {
-    internal interface IExchangeQuotesProvider
-    {
-        double CurrentExchangeQuote();
-    }
+    double CurrentExchangeQuote();
 }

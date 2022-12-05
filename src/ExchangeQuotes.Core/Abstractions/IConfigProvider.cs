@@ -1,9 +1,8 @@
-﻿namespace ExchangeQuotes.Core.Abstractions
-{
-    public interface IConfigProvider<T> where T : new()
-    {
-        T GetOrCreateDefaultConfig();
+﻿namespace ExchangeQuotes.Core.Abstractions;
 
-        void CreateDefaultConfig();
-    }
+public interface IConfigProvider<T> where T : new()
+{
+    T GetOrCreateDefaultConfig();
+
+    void CreateDefaultConfig();
 }

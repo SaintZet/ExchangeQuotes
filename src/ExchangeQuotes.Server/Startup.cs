@@ -6,32 +6,31 @@ using ExchangeQuotes.Server.Models;
 using ExchangeQuotes.Server.Services;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ExchangeQuotes.Server
+namespace ExchangeQuotes.Server;
+
+internal class Startup
 {
-    internal class Startup
+    public Startup()
     {
-        public Startup()
-        {
-            Configuration = LoadConfiguration(new XmlConfigProvider<Config>("ServerConfig.xml"));
-        }
+        Configuration = LoadConfiguration(new XmlConfigProvider<Config>("ServerConfig.xml"));
+    }
 
-        public Config Configuration { get; }
+    public Config Configuration { get; }
 
-        public IServiceProvider ConfigureServices()
-        {
-            var services = new ServiceCollection()
+    public IServiceProvider ConfigureServices()
+    {
+        var services = new ServiceCollection()
 
-            .AddSingleton<IExchangeQuotesProvider>(new RandomExchangeQuotesGenerator(Configuration.MinValue, Configuration.MaxValue))
-            .AddSingleton<IExchangeQuotesSender>(new UdpClientWrapper(Configuration.Port, Configuration.MulticastIPAddress))
-            .AddSingleton(s => new Application(s.GetRequiredService<IExchangeQuotesSender>(), s.GetRequiredService<IExchangeQuotesProvider>()))
-            ;
+        .AddSingleton<IExchangeQuotesProvider>(new RandomExchangeQuotesGenerator(Configuration.MinValue, Configuration.MaxValue))
+        .AddSingleton<IExchangeQuotesSender>(new UdpClientWrapper(Configuration.Port, Configuration.MulticastIPAddress))
+        .AddSingleton(s => new Application(s.GetRequiredService<IExchangeQuotesSender>(), s.GetRequiredService<IExchangeQuotesProvider>()))
+        ;
 
-            return services.BuildServiceProvider();
-        }
+        return services.BuildServiceProvider();
+    }
 
-        private Config LoadConfiguration(IConfigProvider<Config> configProvider)
-        {
-            return configProvider.GetOrCreateDefaultConfig();
-        }
+    private Config LoadConfiguration(IConfigProvider<Config> configProvider)
+    {
+        return configProvider.GetOrCreateDefaultConfig();
     }
 }
