@@ -22,7 +22,7 @@ public class StandardDeviationCalculatorTest
         }
 
         double result = calculator.GetCurrentResult();
-        var x = calculator.SampleVariance;
+
         // Assert
         Assert.Equal(System.Math.Round(expected, _roundDigits), System.Math.Round(result, _roundDigits));
     }
