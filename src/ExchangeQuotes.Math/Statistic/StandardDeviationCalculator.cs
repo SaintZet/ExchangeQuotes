@@ -18,11 +18,11 @@ public class StandardDeviationCalculator : IStatisticThreadSafeCalculator
 
             var dSquaredIncrement = (number - newMean) * (number - _calculatedData.Mean);
 
-            var newDSquared = _calculatedData.DSquared + dSquaredIncrement;
+            var newDSquared = _calculatedData.DeviationSquared + dSquaredIncrement;
 
             _calculatedData.Mean = newMean;
 
-            _calculatedData.DSquared = newDSquared;
+            _calculatedData.DeviationSquared = newDSquared;
         }
     }
 
@@ -30,7 +30,7 @@ public class StandardDeviationCalculator : IStatisticThreadSafeCalculator
     {
         lock (_calculatedData)
         {
-            var sampleVariance = _calculatedData.Count > 1 ? _calculatedData.DSquared / (_calculatedData.Count - 1) : 0;
+            var sampleVariance = _calculatedData.Count > 1 ? _calculatedData.DeviationSquared / (_calculatedData.Count - 1) : 0;
 
             return System.Math.Sqrt(sampleVariance);
         }
@@ -40,6 +40,6 @@ public class StandardDeviationCalculator : IStatisticThreadSafeCalculator
     {
         public int Count { get; set; }
         public double Mean { get; set; }
-        public double DSquared { get; set; }
+        public double DeviationSquared { get; set; }
     }
 }

@@ -19,12 +19,12 @@ internal class Application
 
     internal void StartDoWork(int workDelay = 0)
     {
-        _exchangeQuotesReceiver!.DataReceived += DataReciveHandler;
+        _exchangeQuotesReceiver!.DataReceived += DataRecivedHandler;
         _exchangeQuotesReceiver.StartListeningIncomingData();
 
         var timer = new Timer(ReciverDelay!, workDelay, TimeSpan.Zero, TimeSpan.FromSeconds(1));
 
-        _exchangeQuotesView.RequestedData += DataRequestedHandler;
+        _exchangeQuotesView.RequesteData += DataRequestHandler;
         _exchangeQuotesView.StartDoWork();
     }
 
@@ -45,13 +45,13 @@ internal class Application
         _exchangeQuotesReceiver.RecivePause = false;
     }
 
-    private void DataReciveHandler(object? sender, EventArgs e)
+    private void DataRecivedHandler(object? sender, EventArgs e)
     {
         ReceivedEventArgs receivedEventArgs = (ReceivedEventArgs)e;
         _exchangeQuotesCalculateWorker!.CalculateValues(receivedEventArgs.Data!);
     }
 
-    private void DataRequestedHandler(object? sender, EventArgs e)
+    private void DataRequestHandler(object? sender, EventArgs e)
     {
         var data = _exchangeQuotesCalculateWorker.GetCurrentValues();
         var packetLoss = _exchangeQuotesReceiver.PacketLoss;

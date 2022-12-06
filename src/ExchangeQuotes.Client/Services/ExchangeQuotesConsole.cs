@@ -6,7 +6,7 @@ namespace ExchangeQuotes.Client.Services;
 
 internal class ExchangeQuotesConsole : IExchangeQuotesView
 {
-    public event EventHandler? RequestedData;
+    public event EventHandler? RequesteData;
 
     public void DisplayData(ExchangeQuotesStatistic data, long packetLoss)
     {
@@ -27,7 +27,7 @@ internal class ExchangeQuotesConsole : IExchangeQuotesView
         {
             if (Console.ReadKey().Key == ConsoleKey.Enter)
             {
-                RequestedData?.Invoke(this, new EventArgs());
+                RequesteData?.Invoke(this, new EventArgs());
             }
         }
     }

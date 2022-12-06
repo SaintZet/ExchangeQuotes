@@ -4,7 +4,7 @@ namespace ExchangeQuotes.Client.Abstractions;
 
 internal interface IExchangeQuotesView
 {
-    event EventHandler? RequestedData;
+    event EventHandler? RequesteData;
 
     void StartDoWork();
 
