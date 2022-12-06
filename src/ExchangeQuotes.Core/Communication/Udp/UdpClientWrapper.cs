@@ -99,8 +99,3 @@ public sealed class UdpClientWrapper : IDisposable, IExchangeQuotesReceiver, IEx
         DataReceived?.Invoke(this, _receivedEventArgs);
     }
 }
-
-public class ReceivedEventArgs : EventArgs
-{
-    public byte[]? Data { get; set; }
-}
