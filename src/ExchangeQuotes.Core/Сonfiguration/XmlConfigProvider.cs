@@ -6,14 +6,14 @@ namespace ExchangeQuotes.Core.Сonfiguration;
 
 public class XmlConfigProvider<T> : IConfigProvider<T> where T : new()
 {
-    private string _pathToConfig;
+    private readonly string _pathToConfig;
 
     public XmlConfigProvider(string pathToConfig)
     {
         _pathToConfig = pathToConfig;
     }
 
-    public T GetOrCreateDefaultConfig()
+    public T GetConfigOrCreateDefault()
     {
         if (!File.Exists(_pathToConfig))
         {

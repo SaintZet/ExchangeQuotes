@@ -1,5 +1,4 @@
 ﻿using ExchangeQuotes.Math.Abstractions;
-using System.Collections.Concurrent;
 
 namespace ExchangeQuotes.Math.Statistic;
 

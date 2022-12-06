@@ -4,28 +4,42 @@ namespace ExchangeQuotes.Math.Statistic;
 
 public class StandardDeviationCalculator : IStatisticThreadSafeCalculator
 {
-    private int _count;
-    private double _mean;
-    private double _dSquared;
+    private readonly CalculatedData _calculatedData = new();
 
     public void AddNumberToSequence(int number)
     {
-        _count++;
+        lock (_calculatedData)
+        {
+            _calculatedData.Count++;
 
-        var meanDifferential = (number - _mean) / _count;
+            var meanDifferential = (number - _calculatedData.Mean) / _calculatedData.Count;
 
-        var newMean = _mean + meanDifferential;
+            var newMean = _calculatedData.Mean + meanDifferential;
 
-        var dSquaredIncrement = (number - newMean) * (number - _mean);
+            var dSquaredIncrement = (number - newMean) * (number - _calculatedData.Mean);
 
-        var newDSquared = _dSquared + dSquaredIncrement;
+            var newDSquared = _calculatedData.DSquared + dSquaredIncrement;
 
-        _mean = newMean;
+            _calculatedData.Mean = newMean;
 
-        _dSquared = newDSquared;
+            _calculatedData.DSquared = newDSquared;
+        }
     }
 
-    public double GetCurrentResult() => System.Math.Sqrt(SampleVariance());
+    public double GetCurrentResult()
+    {
+        lock (_calculatedData)
+        {
+            var sampleVariance = _calculatedData.Count > 1 ? _calculatedData.DSquared / (_calculatedData.Count - 1) : 0;
 
-    public double SampleVariance() => _count > 1 ? _dSquared / (_count - 1) : 0;
+            return System.Math.Sqrt(sampleVariance);
+        }
+    }
+
+    private class CalculatedData
+    {
+        public int Count { get; set; }
+        public double Mean { get; set; }
+        public double DSquared { get; set; }
+    }
 }

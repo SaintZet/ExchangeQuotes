@@ -2,7 +2,7 @@
 
 public interface IConfigProvider<T> where T : new()
 {
-    T GetOrCreateDefaultConfig();
+    T GetConfigOrCreateDefault();
 
     void CreateDefaultConfig();
 }

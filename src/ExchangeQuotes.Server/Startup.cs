@@ -31,6 +31,6 @@ internal class Startup
 
     private Config LoadConfiguration(IConfigProvider<Config> configProvider)
     {
-        return configProvider.GetOrCreateDefaultConfig();
+        return configProvider.GetConfigOrCreateDefault();
     }
 }

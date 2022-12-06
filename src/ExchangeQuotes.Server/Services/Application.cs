@@ -16,7 +16,6 @@ internal class Application
 
     internal void StartDoWork()
     {
-        int i = 0;
         while (true)
         {
             int data = _exchangeQuotesProvider.CurrentExchangeQuote();
