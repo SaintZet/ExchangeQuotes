@@ -1,4 +1,5 @@
 ﻿using ExchangeQuotes.Client.Abstractions;
+using ExchangeQuotes.Client.Constants;
 using ExchangeQuotes.Client.Models;
 using ExchangeQuotes.Client.Services;
 using ExchangeQuotes.Core.Abstractions;
@@ -12,7 +13,7 @@ internal class Startup
 {
     public Startup()
     {
-        Configuration = LoadConfiguration(new XmlConfigProvider<Config>("ClientConfig.xml"));
+        Configuration = LoadConfiguration(new XmlConfigProvider<Config>(StartupConstants.PathToConfigFile));
     }
 
     public Config Configuration { get; }

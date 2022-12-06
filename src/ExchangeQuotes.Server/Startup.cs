@@ -2,6 +2,7 @@
 using ExchangeQuotes.Core.Communication.Udp;
 using ExchangeQuotes.Core.Сonfiguration;
 using ExchangeQuotes.Server.Abstractions;
+using ExchangeQuotes.Server.Constants;
 using ExchangeQuotes.Server.Models;
 using ExchangeQuotes.Server.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,7 +13,7 @@ internal class Startup
 {
     public Startup()
     {
-        Configuration = LoadConfiguration(new XmlConfigProvider<Config>("ServerConfig.xml"));
+        Configuration = LoadConfiguration(new XmlConfigProvider<Config>(StartupConstants.PathToConfigFile));
     }
 
     public Config Configuration { get; }

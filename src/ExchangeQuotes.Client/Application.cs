@@ -1,4 +1,5 @@
 ﻿using ExchangeQuotes.Client.Abstractions;
+using ExchangeQuotes.Client.Constants;
 using ExchangeQuotes.Core.Abstractions;
 using ExchangeQuotes.Core.Communication.Udp;
 
@@ -22,7 +23,7 @@ internal class Application
         _exchangeQuotesReceiver!.DataReceived += DataRecivedHandler;
         _exchangeQuotesReceiver.StartListeningIncomingData();
 
-        var timer = new Timer(ReciverDelay!, workDelay, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+        var timer = new Timer(ReciverDelay!, workDelay, TimeSpan.Zero, TimeSpan.FromMilliseconds(ApplicationConstants.DuringForDelayInMilliseconds));
 
         _exchangeQuotesView.RequesteData += DataRequestHandler;
         _exchangeQuotesView.StartDoWork();
