@@ -2,7 +2,7 @@
 using ExchangeQuotes.Core.Abstractions;
 using ExchangeQuotes.Core.Communication.Udp;
 
-namespace ExchangeQuotes.Client.Services;
+namespace ExchangeQuotes.Client;
 
 internal class Application
 {

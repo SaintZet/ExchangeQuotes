@@ -1,7 +1,7 @@
 ﻿using ExchangeQuotes.Core.Abstractions;
 using ExchangeQuotes.Server.Abstractions;
 
-namespace ExchangeQuotes.Server.Services;
+namespace ExchangeQuotes.Server;
 
 internal class Application
 {

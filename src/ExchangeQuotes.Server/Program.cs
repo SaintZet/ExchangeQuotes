@@ -1,5 +1,4 @@
-﻿using ExchangeQuotes.Server.Services;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 
 namespace ExchangeQuotes.Server;
 
