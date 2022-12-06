@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExchangeQuotes.Core", "Exch
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExchangeQuotes.Server", "ExchangeQuotes.Server\ExchangeQuotes.Server.csproj", "{28DF1E55-070E-4A98-832C-9864A6B7A6A9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExchangeQuotes.Math.UnitTests", "ExchangeQuotes.Math.UnitTests\ExchangeQuotes.Math.UnitTests.csproj", "{2F90F6AF-93C7-4484-95BD-28D45F2B0278}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{28DF1E55-070E-4A98-832C-9864A6B7A6A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{28DF1E55-070E-4A98-832C-9864A6B7A6A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{28DF1E55-070E-4A98-832C-9864A6B7A6A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F90F6AF-93C7-4484-95BD-28D45F2B0278}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F90F6AF-93C7-4484-95BD-28D45F2B0278}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F90F6AF-93C7-4484-95BD-28D45F2B0278}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F90F6AF-93C7-4484-95BD-28D45F2B0278}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
