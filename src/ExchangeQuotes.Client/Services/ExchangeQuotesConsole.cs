@@ -10,13 +10,13 @@ internal class ExchangeQuotesConsole : IExchangeQuotesView
 
     public void DisplayData(ExchangeQuotesStatistic data, long packetLoss)
     {
-        StringBuilder stringBuilder = new();
-        stringBuilder.AppendLine($"Average: {data.Average}");
-        stringBuilder.AppendLine($"Median: {data.Median}");
-        stringBuilder.AppendLine($"Mode: {data.Mode}");
-        stringBuilder.AppendLine($"StandardDeviation: {data.StandardDeviation}");
-        stringBuilder.AppendLine();
-        stringBuilder.AppendLine($"Packet Loss: {packetLoss}");
+        var stringBuilder = new StringBuilder()
+                .AppendLine($"Average: {data.Average}")
+                .AppendLine($"Median: {data.Median}")
+                .AppendLine($"Mode: {data.Mode}")
+                .AppendLine($"StandardDeviation: {data.StandardDeviation}")
+                .AppendLine()
+                .AppendLine($"Packet Loss: {packetLoss}");
 
         Console.WriteLine(stringBuilder.ToString());
     }
