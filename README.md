@@ -55,7 +55,7 @@ Contacts: [LinkedIn](https://www.linkedin.com/in/serhii-chepets-412b46223/) / [G
 
 ## Version History
 
-* 0.1
+* v1.0.0
     * Initial Release
 
 ## License
