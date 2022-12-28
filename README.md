@@ -1,6 +1,6 @@
 # Exchange Quotes
 
-Test task on position .NET middle developer for a Ukrainian company [Profit Center FX](https://profitcenterfx.com).
+Test assignment on position .NET middle developer for a Ukrainian company [Profit Center FX](https://profitcenterfx.com).
 
 The project used DepenedencyInjection, Modular Monolith design, xUnit tests for math logic, concurrent velues for thread safe math library.
 
